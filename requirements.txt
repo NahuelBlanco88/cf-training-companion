@@ -3,4 +3,9 @@ uvicorn
 pydantic
 sqlalchemy
 pg8000
+asyncpg
+aiosqlite
 python-dotenv
+pytest
+pytest-asyncio
+httpx
