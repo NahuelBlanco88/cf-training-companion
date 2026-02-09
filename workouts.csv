@@ -1,0 +1,778 @@
+id,date,exercise,value,unit,sets,reps,rpe,cycle,week,iso_week,day,plan_day_id,notes
+1,2025-07-01,Snatch Balance,30.0,kg,5,3,,1,1,27,1,1,Performed 5x3 @ 30kg as part of Day 1 weightlifting.
+2,2025-07-01,Hip Snatch + Hang Snatch + Overhead Squat,40.0,kg,5,1+1+1,,1,1,27,1,1,"Complex performed at 40kg, 5 sets of (1+1+1)"
+3,2025-07-01,Back Squat (Tempo & Pause),60.0,kg,4,5,7.5,1,1,27,1,1,"Performed 4x5 at 60kg, tempo and pause back squats, estimated RPE 7.5"
+4,2025-07-01,Romanian Deadlift,70.0,kg,3,8,6.0,1,1,27,1,1,Performed 3x8 at 70kg
+5,2025-07-01,Assault Bike,2981.0,meter,8,0:20,,1,1,27,1,1,"E2MOM x8: Assault Bike @ 90% effort, 2981m total, 105.6 cal"
+6,2025-07-01,GHD Hip Extension Hold,,,3,0:30,,1,1,27,1,1,Held 30s per round for 3 rounds
+7,2025-07-01,Landmine Twist,10.0,kg,3,20,,1,1,27,1,1,"Performed for 3 rounds, 20 reps @10kg"
+8,2025-07-02,Jerk Balance,40.0,kg,3,3,,1,1,27,2,2,Completed 3x3 at 40kg
+9,2025-07-02,Pause Split Jerk (on recovery),,,5,3,,1,1,27,2,2,"Performed 3×3 @ 40kg, then 2×3 @ 50kg"
+10,2025-07-02,Seated Overhead Press,40.0,kg,4,6,8.0,1,1,27,2,2,Performed 4x6 @ 40kg
+11,2025-07-02,Weighted Chin-Ups (Pause on Top),8.0,kg,4,5,,1,1,27,2,2,"4x5 @ 8kg, paused at top"
+12,2025-07-02,E5MOM Conditioning + Row,,,7,,,1,1,27,2,2,"35 min aerobic base. E5MOM:
+- 12 Box Jump Overs
+- 10 Toes-To-Bar
+- 8 Hang DB Clean & Jerk @30kg
+Remaining time: Row @ 70% effort"
+13,2025-07-04,Hang Power Clean,40.0,kg,4,5,,1,1,27,3,3,Weightlifting segment
+14,2025-07-04,Power Clean + Hang Clean (Squat),60.0,kg,5,2,,1,1,27,3,3,"4x(1+1) @ 60kg, 1x(1+1) @ 70kg. Complex includes Power Clean + Hang Clean (Squat)."
+15,2025-07-04,Pause Deadlift (0-2-0),90.0,kg,4,4,,1,1,27,3,3,"Strength segment, tempo 0-2-0"
+16,2025-07-04,Front Squat,55.0,kg,4,8,,1,1,27,3,3,"1x8 @ 50kg, 3x8 @ 55kg"
+17,2025-07-04,EMOM - Skill & Capacity,15.0,min,15,varied,,1,1,27,3,3,"EMOM 15 min: 1) 12–15 Double Unders, 2) 15 Pull-Ups, 3) 8 Power Cleans @ 45kg"
+18,2025-07-08,Snatch Balance,30.0,kg,5,3,,1,2,28,1,1,
+19,2025-07-08,Hip Snatch + Hang Snatch + Overhead Squats,45.0,kg,5,1+1+1,,1,2,28,1,1,Complex of 3 movements
+20,2025-07-08,Back Squats @ Tempo & Pause,65.0,kg,4,5,,1,2,28,1,1,Controlled tempo and pause at bottom
+21,2025-07-08,Romanian Deadlifts,80.0,kg,3,8,6.0,1,2,28,1,1,
+22,2025-07-08,E2MOM 0:20 Assault Bike Sprints x 8,2640.0,meters,8,0:20,9.0,1,2,28,1,1,"E2MOM x8, total 100.5 calories"
+23,2025-07-08,GHD Hip Extension Hold,30.0,seconds,3,1,,1,2,28,1,1,"Part of core work, 3 rounds"
+24,2025-07-08,Landmine Twist,10.0,kg,3,20,,1,2,28,1,1,"Part of core work, 3 rounds"
+25,2025-07-09,Jerk Balance,30.0,kg,3,3,,1,2,28,2,2,
+26,2025-07-09,Pause Split Jerk,55.0,kg,2+3,3,,1,2,28,2,2,3×3 @ 50kg + 2×3 @ 55kg
+27,2025-07-09,Seated Overhead Press,42.5,kg,4,6,,1,2,28,2,2,
+28,2025-07-09,Aerobic Base Conditioning (Circuit + BikeErg),,,7,1,,1,2,28,2,2,"Every 5min: 10 Wall Ball (10kg), 8 Pull-Ups, 12 Box Jumps, 8 Pull-Ups, 10 Wall Ball. Remaining time: BikeErg @ ~70%"
+53,2025-07-09,Jerk Balance,30.0,kg,3,3,,1,3,29,2,,
+54,2025-07-09,Pause Split Jerk,60.0,kg,5,3,,1,3,29,2,,"Tempo 0:3:0 — 3x55kg, 2x60kg"
+55,2025-07-09,Seated Overhead Press,45.0,kg,4,6,,1,3,29,2,,"2x42.5kg, 2x45kg"
+56,2025-07-09,Weighted Chin-Ups,10.0,kg,4,5,,1,3,29,2,,Pause on top
+57,2025-07-09,Conditioning – For Time,35.0,minutes,,,,1,3,29,2,,"Aerobic Base Ladder: Row 400/800/1200m, Wall Balls 50/40/30, Toes to Bar 50/40/30, Burpee Box Jumps Over 3×20"
+29,2025-07-10,Hang Power Clean,50.0,kg,4,5,,1,2,28,3,3,
+30,2025-07-10,Power Clean + Hang Clean (Squat),60.0,kg,1,1+1,,1,2,28,3,3,Progression from 60kg to 75kg
+31,2025-07-10,Power Clean + Hang Clean (Squat),70.0,kg,3,1+1,,1,2,28,3,3,
+32,2025-07-10,Power Clean + Hang Clean (Squat),75.0,kg,1,1+1,,1,2,28,3,3,
+33,2025-07-10,Pause Deadlift,100.0,kg,2,4,,1,2,28,3,3,
+34,2025-07-10,Pause Deadlift,105.0,kg,2,4,,1,2,28,3,3,
+35,2025-07-10,Front Squat,65.0,kg,4,8,,1,2,28,3,3,
+36,2025-07-10,EMOM Conditioning,,,15,1,,1,2,28,3,3,EMOM: A) 20 Double Unders B) 12–15 Toes-to-Bar C) 14 Alt DB Snatch @ 22.5kg
+65,2025-07-10,Handstand to Wall Hold,,,3,20 sec hold,,1,3,29,4,9,Gymnastics skill
+66,2025-07-10,"Eccentric HSPU (Strict, ABMAT)",,,5,5,,1,3,29,4,9,Gymnastics skill
+67,2025-07-10,Bench Press,,kg,5,5,,1,3,29,4,9,"Strength segment; progressive loading: 1x60kg, 2x62.5kg, 2x65kg"
+68,2025-07-10,Pendlay Row,65.0,kg,4,8,,1,3,29,4,9,Strength segment
+69,2025-07-10,Skill Work Capacity Conditioning,,,5,1 round per set,,1,3,29,4,9,"10 Double Unders, 10 C2B Pull-Ups, 10 Clean & Jerk @50kg, 10 C2B Pull-Ups, 10 Double Unders; Rest 1 min between rounds; Duration: 26:17; Round durations: 3:26 / 3:55 / 4:46 / 5:19 / 4:45; HR avg/max: 149–165 / 166–174 bpm"
+48,2025-07-13,Snatch Balance,30.0,kg,5,3,,1,3,28,1,8,
+49,2025-07-13,Complex: Hip Snatch + Hang Snatch + OHS,45.0,kg,5,1+1+1,,1,3,28,1,8,Complex of Hip Snatch + Hang Snatch + Overhead Squat
+50,2025-07-13,Back Squat,70.0,kg,4,5,,1,3,28,1,8,
+51,2025-07-13,Romanian Deadlifts,80.0,kg,3,8,6.0,1,3,28,1,8,
+52,2025-07-13,E2MOM Assault Bike Sprint,103.6,calories,8,0:20 sprint,,1,3,28,1,8,E2MOM x 8 Rounds - 0:20 Assault Bike Sprint @ 90% Effort | Total distance: 2592.2m
+58,2025-07-13,Hang Power Clean,40.0,kg,4,5,,1,3,28,3,8,
+59,2025-07-13,Power Clean + Hang Clean,60.0,kg,1,1+1,,1,3,28,3,8,1 set @ 60kg
+60,2025-07-13,Power Clean + Hang Clean,65.0,kg,2,1+1,,1,3,28,3,8,2 sets @ 65kg
+61,2025-07-13,Power Clean + Hang Clean,70.0,kg,3,1+1,,1,3,28,3,8,3 sets @ 70kg
+62,2025-07-13,Pause Deadlift,100.0,kg,2,4,,1,3,28,3,8,2 sets @ 100kg
+63,2025-07-13,Pause Deadlift,110.0,kg,2,4,,1,3,28,3,8,2 sets @ 110kg
+64,2025-07-13,Front Squat,60.0,kg,4,8,,1,3,28,3,8,
+70,2025-07-20,Snatch Balance,25.0,kg,5,3,,1,1,29,1,1,"Range 20-30kg, warm-up focused."
+71,2025-07-20,Hip Snatch + Hang Snatch + Overhead Squat,48.5,kg,5,1+1+1,,1,1,29,1,1,Complex performed at 47-50kg
+72,2025-07-20,Back Squat (Tempo & Pause),75.0,kg,4,5,,1,1,29,1,1,3-2-0 tempo with pause at bottom. Controlled execution.
+73,2025-07-20,Romanian Deadlifts,,,3,8,6.0,1,1,29,1,1,Controlled eccentric. No specific load listed.
+74,2025-07-20,Air Bike Sprint,,,8,0:20,,1,1,29,1,1,E2MOM x8. Sprint @ 90% effort for anaerobic respiration.
+75,2025-07-20,GHD Hip Extension Hold,,,3,0:30,,1,1,29,1,1,Core hold for 30s x3 rounds
+76,2025-07-20,Landmine Twist,,,3,20,,1,1,29,1,1,"Performed as part of core finisher, 3 rounds"
+77,2025-07-20,Snatch Balance,30.0,kg,5,3,,1,4,30,1,10,
+78,2025-07-20,Hip Snatch + Hang Snatch + Overhead Squat,50.0,kg,5,1+1+1,,1,4,30,1,10,"Complex: 1x(1+1+1)@40kg, 2x(1+1+1)@45kg, 2x(1+1+1)@47.5kg"
+79,2025-07-20,Back Squat (Tempo 3-2-0 + Pause),75.0,kg,4,5,,1,4,30,1,10,"1x5@70kg, 3x5@75kg"
+80,2025-07-20,Romanian Deadlift,90.0,kg,3,8,,1,4,30,1,10,"2x8@85kg, 1x8@90kg"
+81,2025-07-20,Assault Bike Sprint (E2MOM 8 Rounds),103.9,calories,8,20s sprint,,1,4,30,1,10,Distance: 2584.6m; Sprint every 2 min for 8 rounds
+82,2025-07-20,Core Circuit,3.0,rounds,3,varied,,1,4,30,1,10,"3 Rounds: 30s GHD Hip Extension Hold, 20 Landmine Twists (10/side) @10kg"
+83,2025-07-22,Jerk Balance,30.0,kg,3,3,,1,4,30,2,11,
+84,2025-07-22,Pause Split Jerk (3s recovery pause),60.0,kg,5,3,,1,4,30,2,11,"1x3@50kg, 1x3@55kg, 3x3@60kg"
+85,2025-07-22,Seated Overhead Press,45.0,kg,4,6,,1,4,30,2,11,"1x6@42.5kg, 3x6@45kg; strict press, back supported if needed"
+86,2025-07-22,Weighted Chin-Ups (pause at top),10.0,kg,4,5,,1,4,30,2,11,
+87,2025-07-22,35-min AMRAP Conditioning,35.0,minutes,1,AMRAP,,1,4,30,2,11,"5 rounds + 200m Run, 20 KBS (24kg), 200m Run, 10 BBJO, 200m Run. AMRAP: 200m Run, 20 KBS (24kg), 200m Run, 10 BBJO, 200m Run, 4 Wall Walks"
+88,2025-07-24,Hang Power Clean,40.0,kg,4,5,,1,4,30,3,12,
+89,2025-07-24,Power Clean + Hang Clean,75.0,kg,5,1+1,,1,4,30,3,12,"1x(1+1)@70kg, 4x(1+1)@75kg"
+90,2025-07-24,Pause Deadlift,115.0,kg,4,4,,1,4,30,3,12,"2x4@110kg, 2x4@115kg"
+91,2025-07-24,Front Squat,65.0,kg,4,8,,1,4,30,3,12,
+92,2025-07-24,Partner Metcon - 10 Rounds for Time,14.67,minutes,10,12 cal bike + 200m run,,1,4,30,3,12,Partner workout (You Go – I Go): 10 Rounds each of 12 Cal Bike + 200m Run. Time: 14:40
+93,2025-07-24,Clean & Jerk Complex,70.0,kg,2,varied,,1,4,30,3,12,Completed sets at 60kg and 70kg
+94,2025-07-26,Handstand to Wall,,,3,20 sec hold,,1,4,30,4,10,Gymnastics; static holds
+95,2025-07-26,"Eccentric HSPU (Strict, ABMAT)",,,5,5,,1,4,30,4,10,Gymnastics; eccentric strength development
+96,2025-07-26,Bench Press,62.5,kg,1,5,,1,4,30,4,10,Strength; paused reps
+97,2025-07-26,Bench Press,65.0,kg,4,5,,1,4,30,4,10,Strength; paused reps
+98,2025-07-26,Pendlay Rows,65.0,kg,3,8,,1,4,30,4,10,Strength; strict form
+99,2025-07-26,Pendlay Rows,70.0,kg,1,8,,1,4,30,4,10,Strength; top set
+100,2025-07-26,"EMOM - Double Unders, C2B, Wall Balls",,,4 rounds,"Each minute: 20 DU, 10–12 C2B, 20 DU, 15 WB (12kg)",,1,4,30,4,10,EMOM x 16 min; Skill/Work Capacity Conditioning
+112,2025-07-29,Jerk Dip + Jerk Pause + Jerk Complex,60.0,kg,1,1+1+1,,1,1,30,2,12,"Cycle: RFA Temp, Set 5 of 6"
+113,2025-07-29,Jerk Dip + Jerk Pause + Jerk Complex,60.0,kg,1,1+1+1,,1,1,30,2,12,"Cycle: RFA Temp, Set 6 of 6"
+114,2025-07-29,Overhead Press,40.0,kg,1,5,,1,1,30,2,12,"Cycle: RFA Temp, Set 1 of 6"
+115,2025-07-29,Overhead Press,45.0,kg,1,5,,1,1,30,2,12,"Cycle: RFA Temp, Set 2 of 6"
+116,2025-07-29,Overhead Press,50.0,kg,1,3,,1,1,30,2,12,"Cycle: RFA Temp, Set 3 of 6"
+117,2025-07-29,Overhead Press,55.0,kg,1,3,,1,1,30,2,12,"Cycle: RFA Temp, Set 4 of 6"
+118,2025-07-29,Overhead Press,60.0,kg,1,1,,1,1,30,2,12,"Cycle: RFA Temp, Set 5 of 6"
+119,2025-07-29,Overhead Press,60.0,kg,1,1,,1,1,30,2,12,"Cycle: RFA Temp, Set 6 of 6"
+120,2025-07-29,Weighted Pull-Up,10.0,kg,1,5,,1,1,30,2,12,"Cycle: RFA Temp, Set 1 of 4"
+121,2025-07-29,Weighted Pull-Up,10.0,kg,1,5,,1,1,30,2,12,"Cycle: RFA Temp, Set 2 of 4"
+122,2025-07-29,Weighted Pull-Up,12.0,kg,1,3,,1,1,30,2,12,"Cycle: RFA Temp, Set 3 of 4"
+123,2025-07-29,Weighted Pull-Up,16.0,kg,1,3,,1,1,30,2,12,"Cycle: RFA Temp, Set 4 of 4"
+124,2025-07-29,"AMRAP 35 min: 400m BikeErg, 20 American KB Swings (24 kg), 400m BikeErg, 15 Box Jump Over, 400m BikeErg, 5 Wall Walks",,,1,7 Rounds,,1,1,30,2,12,"Cycle: RFA Temp, 35 min AMRAP format. Total: 7 rounds completed."
+125,2025-07-31,Cycle: RFA Temp – Week 1 – Day 4,,,,,,1,1,30,4,4,"Warm-up (15 min):
+• General movement prep (bike/row/skipping)
+• Shoulder and wrist mobility
+• Wall walks or bear crawls
+• Light DB/BB pressing warm-up
+
+Gymnastics Session:
+• Handstand to Wall – 3×20 sec
+• ABMAT Eccentric HSPU (Strict) – 5×5 @ 300 tempo
+→ Rest as needed
+
+Strength:
+• Bench Press – 5×5 with 2-sec pause @ ______ kg
+• Pendlay Rows – 4×8 @ ______ kg
+
+Skill Work Capacity Conditioning:
+E3MOM x5 (Every 3 Minutes for 5 Rounds):
+• 12 Calories on Rower
+• 15 Wall Ball Shots @ 9 kg
+• 12 Toes to Bar"
+136,2025-08-05,Clean & Jerk,70.0,kg,8,1,,1,2,32,1,4,E1.5MOM × 8 rounds | Cycle 1.5
+137,2025-08-05,Back Squat,77.5,kg,1,5,,1,2,32,1,4,Cycle 1.5 | Strength part 1
+138,2025-08-05,Back Squat,90.0,kg,2,3,,1,2,32,1,4,Cycle 1.5 | Strength part 2
+139,2025-08-05,Back Squat,105.0,kg,2,1,,1,2,32,1,4,Cycle 1.5 | Strength part 3
+140,2025-08-05,Assault Bike Sprint,1628.7,meters,5,0:20,,1,2,32,1,4,"E2MOM × 5 rounds @ ~90% effort. Calories per round: 15.6, 14.1, 12.8, 12.1, 13.5 | Total calories: 68.1"
+141,2025-08-05,Hanging Tuck Hold + Farmer Carry,32.0,kg,3,2x30m carry + 0:20 hold,,1,2,32,1,4,Core work: 3 rounds of Hanging Tuck Hold (20 sec) + Single-Arm Farmer Carry @ 32 kg kettlebell
+142,2025-08-11,Snatch Balance,40.0,kg,5,3,,2,1,33,1,15,Set 1: 40 kg | Set 2: 40 kg | Set 3: 40 kg | Set 4: 40 kg | Set 5: 40 kg
+143,2025-08-11,Power Snatch + Hang Snatch + Overhead Squat,45.0,kg,6,1+1+1,,2,1,33,1,15,Set 1: 40 kg | Set 2: 45 kg | Set 3: 45 kg | Set 4: 45 kg | Set 5: 45 kg | Set 6: 45 kg
+144,2025-08-11,Back Squat,85.0,kg,5,5,,2,1,33,1,15,Set 1: 80 kg | Set 2: 80 kg | Set 3: 82.5 kg | Set 4: 82.5 kg | Set 5: 85 kg
+145,2025-08-11,Good Morning,45.0,kg,3,10,,2,1,33,1,15,Set 1: 40 kg | Set 2: 45 kg | Set 3: 45 kg
+146,2025-08-11,Row – 30 Cal (E3MOM),30.0,cal,7,30 Cal,,2,1,33,1,15,Round 1: 1:34 | 2:01 pace | Round 2: 1:30 | 1:59 pace | Round 3: 1:32 | 1:56 pace | Round 4: 1:30 | 1:57 pace | Round 5: 1:29 | 1:55 pace | Round 6: 1:35 | 2:00 pace | Round 7: 1:36 | 2:03 pace
+147,2025-08-11,Core – Hanging Tuck Hold + Farmer Carry,,,3,,,2,1,33,1,15,Hanging Tuck Hold – 20 sec each round | Farmer Carry – 30 m ×2 @ 32 kg KB each round
+148,2025-08-12,Behind The Neck Jerk,40.0,kg,3,3,,2,1,33,2,18,"Set 1: 40 kg, Set 2: 45 kg, Set 3: 45 kg"
+149,2025-08-12,Jerk Dip + Jerk Pause + Jerk,50.0,kg,6,(1+1+1),,2,1,33,2,18,"Set 1: 50 kg, Set 2: 55 kg, Set 3: 60 kg, Set 4: 60 kg, Set 5: 60 kg, Set 6: 65 kg"
+150,2025-08-12,Overhead Press,45.0,kg,5,5,,2,1,33,2,18,"Set 1: 45 kg, Set 2: 45 kg, Set 3: 47.5 kg, Set 4: 47.5 kg, Set 5: 50 kg"
+151,2025-08-12,Chest-To-Bar Pull-Ups,0.0,BW,5,5,,2,1,33,2,18,"Set 1: BW, Set 2: BW, Set 3: BW, Set 4: BW, Set 5: BW"
+152,2025-08-12,Aerobic Base Conditioning — AMRAP 35 min,35.0,min,AMRAP,Varied,,2,1,33,2,18,"200 m Run, 20 Box Jump Overs (60 cm), 200 m Run, 15 Power Cleans @ 50 kg, 200 m Run, 8 Burpee Pull-Ups. Rounds: R1: 06:30, R2: 06:40, R3: 06:57, R4: 07:53, R5: 07:27"
+153,2025-08-14,Handstand to Wall Hold,,,3,20 sec hold,,2,1,33,4,19,Gymnastics: Handstand to Wall – 3×20 sec holds
+154,2025-08-14,ABMAT Eccentric HSPU (Strict),,,5,5 @ controlled 3-sec descent,,2,1,33,4,19,Gymnastics: ABMAT Eccentric HSPU (Strict) – 5×5 @ controlled 3-sec descent
+155,2025-08-14,Bench Press,65.0,kg,5,5,,2,1,33,4,19,"Strength: Bench Press – 5×5, tempo 0-2-0, rest 2 min. Sets: 60 kg, 62 kg, 62 kg, 62 kg, 65 kg"
+156,2025-08-14,Pendlay Rows,70.0,kg,4,8,,2,1,33,4,19,"Strength: Pendlay Rows – 4×8, rest 90 sec. Sets: 60 kg, 65 kg, 70 kg, 70 kg"
+157,2025-08-14,Classic Metcon - 3 Rounds for Time (DL + HPC + STOH),565.0,total reps,,,,2,1,33,4,19,"Metcon: 3 Rounds for Time – 12 Deadlifts, 9 Hang Power Cleans, 6 Shoulder to Overhead, 60 kg, Time: 09:25"
+158,2025-08-16,High Hang Clean (Squat),40.0,kg,3,3,,2,1,33,3,18,3x3 @40kg. All sets completed as prescribed.
+159,2025-08-16,Knee Pause Power Clean + Clean,,,6,1+2,,2,1,33,3,18,"6x(1+2) @65–70kg. Sets: 65, 65, 67.5, 67.5, 70, 70 kg"
+160,2025-08-16,Deadlift,,,5,5,,2,1,33,3,18,"5x5 @115–125kg. Sets: 115, 115, 120, 120, 125 kg. RPE ~8"
+161,2025-08-16,EMOM 15: Double Unders / C2B Pull-Ups / DB Thrusters,,,,,,2,1,33,3,18,"EMOM 15 min. Min 1: 30 DU (scaled down after round 3). Min 2: 12–15 C2B Pull-Ups (dropped to 14 on round 4, 12 on round 5). Min 3: 8 DB Thrusters (2x22.5kg)."
+162,2025-08-16,High Hang Clean (Squat),40.0,kg,3,"3,3,3",,2,1,33,3,18,Cycle 2 | Week 1 | ISO 33 | Day 3 | 3×3 all sets at 40kg
+163,2025-08-16,Knee Pause Power Clean + Clean,70.0,kg,6,"1+2,1+2,1+2,1+2,1+2,1+2",,2,1,33,3,18,Set 1: 65kg | Set 2: 65kg | Set 3: 67.5kg | Set 4: 67.5kg | Set 5: 70kg | Set 6: 70kg
+164,2025-08-16,Deadlift,125.0,kg,5,"5,5,5,5,5",,2,1,33,3,18,Set 1: 115kg | Set 2: 115kg | Set 3: 120kg | Set 4: 120kg | Set 5: 125kg | RPE ~8
+165,2025-08-16,EMOM 15 min (DU + C2B + DB Thrusters),,,15,,,2,1,33,3,18,"Minute 1: 30 Double Unders (failed after 3rd round, reduced volume)
+Minute 2: Chest-to-Bar Pull-Ups (Rounds 1–3: 15, Round 4: 14, Round 5+: 12)
+Minute 3: 8 DB Thrusters (2×22.5kg)"
+171,2025-08-17,Snatch Balance,40.0,kg,5,3,,2,2,34,1,,Sets 1–5: 40 kg
+172,2025-08-17,Power Snatch + Hang Snatch + Overhead Squat,45.0,kg,6,1+1+1,,2,2,34,1,,"Set 1: 40 kg, Set 2: 42.5 kg, Set 3: 42.5 kg, Set 4: 45 kg, Set 5: 45 kg, Set 6: 45 kg"
+173,2025-08-17,Back Squat,85.0,kg,5,5,,2,2,34,1,,"Set 1: 80 kg, Set 2: 82.5 kg, Set 3: 82.5 kg, Set 4: 85 kg, Set 5: 85 kg"
+174,2025-08-17,Good Morning,45.0,kg,3,10,,2,2,34,1,,"Set 1: 42.5 kg, Set 2: 45 kg, Set 3: 45 kg"
+175,2025-08-17,Rowing – Anaerobic Respiration E4MOM ×6,,,,,,2,2,34,1,,"Round times: 1:53.3, 2:07.8, 2:16.9, 2:11.9, 2:18.7, 2:11.9
+Distance: 3,568 m, Calories: 270, Avg Pace: 1:49.2/500m, Stroke Rate: 32 s/m, Stroke Count: 428, HR Avg: 146 bpm, Calories/hour: 1,224"
+166,2025-08-19,Behind the Neck Jerk,40.0,kg,3,3,,2,2,34,2,,"Set 1: 40 kg, Set 2: 40 kg, Set 3: 40 kg"
+167,2025-08-19,Jerk Dip + Jerk Pause + Jerk,70.0,kg,6,1+1+1,,2,2,34,2,,"Set 1: 60 kg, Set 2: 65 kg, Set 3: 65 kg, Set 4: 65 kg, Set 5: 67.5 kg, Set 6: 70 kg"
+168,2025-08-19,Overhead Press,52.5,kg,5,5,,2,2,34,2,,"Set 1: 45 kg, Set 2: 47.5 kg, Set 3: 50 kg, Set 4: 50 kg, Set 5: 52.5 kg"
+169,2025-08-19,Chest-to-Bar Pull-Ups,,,5,5,,2,2,34,2,,Bodyweight 5×5
+170,2025-08-19,Aerobic Base Conditioning,,,,,,2,2,34,2,,"E4MOM ×8 (32 min total)
+A) 36 calories Assault Bike
+B) 12 Wall Ball Shots (10 kg), 10 Chest-to-Bar Pull-Ups, 6 Burpee Box Jumps, 10 Chest-to-Bar Pull-Ups, 12 Wall Ball Shots (10 kg)"
+200,2025-08-19,Aerobic Base Conditioning,,,,,,2,2,34,2,13,"E4MOM ×8 (32 min total). A) 36 cal Assault Bike. B) 12 Wall Ball Shots (10 kg), 10 Chest-to-Bar Pull-Ups, 6 Burpee Box Jumps, 10 C2B Pull-Ups, 12 Wall Ball Shots."
+201,2025-08-23,Handstand to Wall,,,3,20 sec,,2,2,34,4,13,Gymnastics
+202,2025-08-23,ABMAT Eccentric HSPU (Strict),,,5,5,,2,2,34,4,13,Completed all sets
+203,2025-08-23,Bench Press,65.0,kg,5,5,,2,2,34,4,13,"Set 1-3 @65kg, Set 4-5 @67.5kg"
+204,2025-08-23,Pendlay Row,65.0,kg,4,8,,2,2,34,4,13,All sets at 65 kg
+205,2025-08-23,EMOM Conditioning,,,,,,2,2,34,4,13,"15 min EMOM: Min 1 – 30 DU, Min 2 – 12-15 Chest-to-Bar Pull-Ups, Min 3 – 5-6 Devil Press (2×22.5 kg)"
+206,2025-08-25,Snatch Balance,40.0,kg,5,3,,2,3,35,1,14,5×3 @40kg
+207,2025-08-25,Complex (Power Snatch + Hang Snatch + Overhead Squat),,,6,(1+1+1),,2,3,35,1,14,Set1:40kg | Set2:42.5kg | Set3:45kg | Set4:45kg | Set5:47.5kg | Set6:47.5kg
+208,2025-08-25,Back Squat,,,5,5,,2,3,35,1,14,Set1:80kg | Set2:85kg | Set3:85kg | Set4:85kg | Set5:87.5kg
+209,2025-08-25,Good Morning,45.0,kg,3,10,,2,3,35,1,14,3×10 @45kg
+210,2025-08-25,Row (Calories),,,5,60 cal,,2,3,35,1,14,"E5MOM ×5 | R1:1:46.7/500m (1289 Cal/Hr) | R2:1:48.9/500m (1232 Cal/Hr) | R3:1:50.7/500m (1187 Cal/Hr) | R4:1:55.7/500m (1077 Cal/Hr) | R5:1:57.3/500m (1045 Cal/Hr) | Total: 4097m ~15:18 work, Avg pace 1:51.9/500m, Avg Cal/Hr 1166"
+211,2025-08-25,Hanging Tuck Hold,,,3,20 sec,,2,3,35,1,14,3×20 sec on bar
+212,2025-08-25,Single Arm Farmer Carry,32.0,kg,3,30m,,2,3,35,1,14,3 rounds @32kg kettlebell
+213,2025-08-26,Behind the Neck Jerk,40.0,kg,3,3,,2,3,35,2,14,3×3 @40kg
+214,2025-08-26,Jerk Dip + Jerk Pause + Jerk,,,6,(1+1+1),,2,3,35,2,14,Set1:60kg | Set2:65kg | Set3:67.2kg | Set4:67.2kg | Set5:70kg | Set6:70kg
+215,2025-08-26,Overhead Press,,,5,5,,2,3,35,2,14,Set1:50kg | Set2:50kg | Set3:52.5kg | Set4:52.5kg | Set5:55kg
+216,2025-08-26,Chest-to-Bar Pull-Up,,,5,5,,2,3,35,2,14,Weighted 5×5 @8kg
+217,2025-08-26,Aerobic Base Conditioning (E5MOM),,,,,,2,3,35,2,14,12 Wall Ball Shots (9kg) → 8 Burpee to Target → 15 Chest-to-Bar Pull-Ups → 8 Burpee to Target → 12 Wall Ball Shots (9kg). Remaining time Bike Erg ~70% effort.
+218,2025-08-28,Handstand to Wall,,,3,20 sec,,2,3,35,3,14,Gymnastics work
+219,2025-08-28,ABMAT Eccentric HSPU (Strict),,,5,5,,2,3,35,3,14,"300@, rest as needed"
+220,2025-08-28,Dumbbell Bench Press,,,5,5,,2,3,35,3,14,"Modified from Barbell Bench Press. Set 1: 25 kg, Set 2: 25 kg, Set 3: 27.5 kg, Set 4: 27.5 kg, Set 5: 27.5 kg"
+221,2025-08-28,Dumbbell Pendlay Rows,,,4,8,,2,3,35,3,14,"Modified from Barbell Pendlay Rows. Set 1: 25 kg, Set 2: 27.5 kg, Set 3: 27.5 kg, Set 4: 27.5 kg"
+222,2025-08-30,High Hang Clean,40.0,kg,3,3,,2,3,35,4,14,Completed all 3 sets at 40kg
+223,2025-08-30,Knee Pause Power Clean + Clean,,,6,1+2,,2,3,35,4,14,Set 1-3: 72.5kg | Set 4-5: 75kg
+224,2025-08-30,Deadlift,,,5,5,,2,3,35,4,14,Set 1-2: 125kg | Set 3-5: 130kg
+225,2025-08-30,Metcon - Deadlift / Hang Power Clean / Shoulder-to-Overhead,,,,,,2,3,35,4,14,"4 RFT @ 60–65kg | R1: 1:46, R2: 2:23, R3: 3:20, R4: 2:51 | Total: 10:19"
+229,2025-09-01,Good Morning,45.0,kg,3,10,,2,4,36,1,15,RPE 6–7. Warm-up: 40x10. Work sets: 45x10 x3.
+230,2025-09-01,Row (Calories),200.0,cal,,,,2,4,36,1,15,"For Time: 200 cal Row | Result: 10:58.1 | Distance: 2,849 m | Avg Pace: 1:55.4/500m | Avg Watts: 227 | Avg HR: 147 bpm | Splits logged."
+231,2025-09-01,Hanging Tuck Hold,,,1,20 sec,,2,4,36,1,15,Performed 20 sec on bar.
+232,2025-09-01,Single Arm Farmer Carry,32.0,kg,2,30 m,,2,4,36,1,15,Performed 30m ×2 per arm with 32 kg kettlebell.
+247,2025-09-01,Back Squat,40.0,kg,1,5,,2,4,36,1,15,Warm-up set
+248,2025-09-01,Back Squat,60.0,kg,1,3,,2,4,36,1,15,Warm-up set
+249,2025-09-01,Back Squat,70.0,kg,1,3,,2,4,36,1,15,Warm-up set
+250,2025-09-01,Back Squat,85.0,kg,1,3,,2,4,36,1,15,Work set
+251,2025-09-01,Back Squat,100.0,kg,1,4,,2,4,36,1,15,Work set
+252,2025-09-01,Back Squat,105.0,kg,1,5,,2,4,36,1,15,Top set (PR)
+257,2025-09-01,Snatch Balance,30.0,kg,1,3,,2,4,36,1,15,Set 1
+258,2025-09-01,Snatch Balance,30.0,kg,1,3,,2,4,36,1,15,Set 2
+259,2025-09-01,Snatch Balance,35.0,kg,1,3,,2,4,36,1,15,Set 3
+260,2025-09-01,Snatch Balance,40.0,kg,1,3,,2,4,36,1,15,Set 4
+261,2025-09-01,Snatch Balance,40.0,kg,1,3,,2,4,36,1,15,Set 5
+262,2025-09-01,Power Snatch + Hang Snatch + Overhead Squat,45.0,kg,1,1+1+1,,2,4,36,1,15,Set 1
+263,2025-09-01,Power Snatch + Hang Snatch + Overhead Squat,45.0,kg,1,1+1+1,,2,4,36,1,15,Set 2
+264,2025-09-01,Power Snatch + Hang Snatch + Overhead Squat,47.5,kg,1,1+1+1,,2,4,36,1,15,Set 3
+265,2025-09-01,Power Snatch + Hang Snatch + Overhead Squat,47.5,kg,1,1+1+1,,2,4,36,1,15,Set 4
+266,2025-09-01,Power Snatch + Hang Snatch + Overhead Squat,47.5,kg,1,1+1+1,,2,4,36,1,15,Set 5
+267,2025-09-01,Power Snatch + Hang Snatch + Overhead Squat,50.0,kg,1,1+1+1,,2,4,36,1,15,Set 6
+233,2025-09-03,Behind the Neck Jerk,45.0,kg,3,3,,2,4,36,2,15,"Performed 40x3, 45x3, 45x3"
+234,2025-09-03,Jerk Dip + Jerk Pause + Jerk,75.0,kg,6,1+1+1,,2,4,36,2,15,"Performed 65, 70, 70, 72.5, 72.5, 75 kg"
+236,2025-09-03,Chest to Bar Pull-Up,10.0,kg,5,5,,2,4,36,2,15,"Performed weighted pull-ups: 8x5 (4 sets), 10x5 (final set). RPE 7–8."
+237,2025-09-03,AMRAP Conditioning (BikeErg + D-Ball + Box Jump + C2B),,,35 min,,,2,4,36,2,15,"7 full rounds + 400m BikeErg (round 8). Splits: R1 4:47, R2 4:55, R3 4:57, R4 4:53, R5 4:50, R6 4:56, R7 4:52, R8 partial (1:04, 400m BikeErg)."
+253,2025-09-03,Overhead Press,40.0,kg,1,5,,2,4,36,2,15,Warm-up set
+254,2025-09-03,Overhead Press,45.0,kg,1,5,,2,4,36,2,15,Work set
+255,2025-09-03,Overhead Press,50.0,kg,1,3,,2,4,36,2,15,Work set
+256,2025-09-03,Overhead Press,57.5,kg,1,5,,2,4,36,2,15,Top set
+238,2025-09-04,High Hang Clean (Squat),45.0,kg,3,3,,2,4,36,3,15,"Performed 40x3, 45x3, 45x3"
+239,2025-09-04,Knee Pause Power Clean + Clean,75.0,kg,6,1+2,,2,4,36,3,15,"Performed: 70, 72.5, 72.5, 72.5, 75, 75 (completed all sets)."
+241,2025-09-04,Classic Metcon (DL + HPC + STOH),,,5 rounds,,,2,4,36,3,15,"5 Rounds for Time: 12 Deadlifts, 9 Hang Power Cleans, 6 Shoulder to Overhead @ 65 kg | Result: 11:42 min"
+243,2025-09-04,Deadlift,100.0,kg,1,5,,2,4,36,3,15,Warm-up set
+244,2025-09-04,Deadlift,110.0,kg,1,3,,2,4,36,3,15,Progression set
+245,2025-09-04,Deadlift,130.0,kg,1,5,,2,4,36,3,15,Progression set
+246,2025-09-04,Deadlift,140.0,kg,1,5,,2,4,36,3,15,Top set
+242,2025-09-05,DT,702.0,sec,,,,2,4,36,3,,60kg
+268,2025-09-06,Handstand to Wall,,,3,20 sec,,2,4,36,4,15,Gymnastics hold
+269,2025-09-06,ABMAT Eccentric HSPU (Strict),,,5,5,,2,4,36,4,15,5×5 eccentric strict HSPU with ABMAT
+270,2025-09-06,Bench Press,65.0,kg,1,5,,2,4,36,4,15,Set 1
+271,2025-09-06,Bench Press,67.5,kg,1,5,,2,4,36,4,15,Set 2
+272,2025-09-06,Bench Press,67.5,kg,1,5,,2,4,36,4,15,Set 3
+273,2025-09-06,Bench Press,70.0,kg,1,5,,2,4,36,4,15,Set 4
+274,2025-09-06,Bench Press,70.0,kg,1,5,,2,4,36,4,15,Set 5
+275,2025-09-06,Pendlay Row,65.0,kg,1,8,,2,4,36,4,15,Set 1
+276,2025-09-06,Pendlay Row,65.0,kg,1,8,,2,4,36,4,15,Set 2
+277,2025-09-06,Pendlay Row,67.5,kg,1,8,,2,4,36,4,15,Set 3
+278,2025-09-06,Pendlay Row,67.5,kg,1,8,,2,4,36,4,15,Set 4
+279,2025-09-06,Skill Work Capacity Conditioning (5 Rounds),,,5,,,2,4,36,4,15,"5 Rounds For Time: 30 Double Unders, 12 Toes to Bar, 16 Wall Balls (12kg), 12 Toes to Bar, 30 Double Unders. 1:30 rest between rounds."
+280,2025-09-07,Hip Snatch + Balance + Overhead Squat,30.0,kg,1,1+1+1,,3,1,37,1,1,Set 1
+281,2025-09-07,Hip Snatch + Balance + Overhead Squat,30.0,kg,1,1+1+1,,3,1,37,1,1,Set 2
+282,2025-09-07,Hip Snatch + Balance + Overhead Squat,40.0,kg,1,1+1+1,,3,1,37,1,1,Set 3
+283,2025-09-07,Hip Snatch + Balance + Overhead Squat,40.0,kg,1,1+1+1,,3,1,37,1,1,Set 4
+284,2025-09-07,3 Position Snatch Complex (High Hang + Hang + Full Snatch),40.0,kg,1,1+1+1,,3,1,37,1,1,Set 1
+285,2025-09-07,3 Position Snatch Complex (High Hang + Hang + Full Snatch),40.0,kg,1,1+1+1,,3,1,37,1,1,Set 2
+286,2025-09-07,3 Position Snatch Complex (High Hang + Hang + Full Snatch),45.0,kg,1,1+1+1,,3,1,37,1,1,Set 3
+287,2025-09-07,3 Position Snatch Complex (High Hang + Hang + Full Snatch),45.0,kg,1,1+1+1,,3,1,37,1,1,Set 4
+288,2025-09-07,3 Position Snatch Complex (High Hang + Hang + Full Snatch),45.0,kg,1,1+1+1,,3,1,37,1,1,Set 5
+289,2025-09-07,3 Position Snatch Complex (High Hang + Hang + Full Snatch),45.0,kg,1,1+1+1,,3,1,37,1,1,Set 6
+290,2025-09-07,Back Squat,100.0,kg,1,2,,3,1,37,1,1,Set 1
+291,2025-09-07,Back Squat,100.0,kg,1,2,,3,1,37,1,1,Set 2
+292,2025-09-07,Back Squat,100.0,kg,1,2,,3,1,37,1,1,Set 3
+293,2025-09-07,Back Squat,105.0,kg,1,1,,3,1,37,1,1,Set 1
+294,2025-09-07,Back Squat,105.0,kg,1,1,,3,1,37,1,1,Set 2
+295,2025-09-07,Back Squat,105.0,kg,1,1,,3,1,37,1,1,Set 3
+296,2025-09-07,Romanian Deadlift,80.0,kg,1,8,,3,1,37,1,1,Set 1
+297,2025-09-07,Romanian Deadlift,100.0,kg,1,8,,3,1,37,1,1,Set 2
+298,2025-09-07,Romanian Deadlift,100.0,kg,1,8,,3,1,37,1,1,Set 3
+299,2025-09-07,Romanian Deadlift,100.0,kg,1,8,,3,1,37,1,1,Set 4
+300,2025-09-07,Conditioning - AMRAP (Thrusters 40kg + Over Bar Burpees + Assault Bike),25.0,cal,1,,,3,1,37,1,1,Round 1
+301,2025-09-07,Conditioning - AMRAP (Thrusters 40kg + Over Bar Burpees + Assault Bike),20.0,cal,1,,,3,1,37,1,1,Round 2
+302,2025-09-07,Conditioning - AMRAP (Thrusters 40kg + Over Bar Burpees + Assault Bike),18.0,cal,1,,,3,1,37,1,1,Round 3
+303,2025-09-07,Front Rack Hold,110.0,kg,1,30 sec,,3,1,37,1,1,Round 1
+304,2025-09-07,Front Rack Hold,110.0,kg,1,30 sec,,3,1,37,1,1,Round 2
+305,2025-09-07,Front Rack Hold,110.0,kg,1,30 sec,,3,1,37,1,1,Round 3
+306,2025-09-07,Turkish Sit-Up,10.0,kg,1,10/side,,3,1,37,1,1,Round 1
+307,2025-09-07,Turkish Sit-Up,10.0,kg,1,10/side,,3,1,37,1,1,Round 2
+308,2025-09-07,Turkish Sit-Up,10.0,kg,1,10/side,,3,1,37,1,1,Round 3
+309,2025-09-09,Jerk Balance,40.0,kg,3,3,,3,1,37,2,2,Completed all 3 sets
+310,2025-09-09,Split Jerk,70.0,kg,1,3,,3,1,37,2,2,Set 1
+311,2025-09-09,Split Jerk,70.0,kg,1,3,,3,1,37,2,2,Set 2
+312,2025-09-09,Split Jerk,75.0,kg,1,2,,3,1,37,2,2,Set 3
+313,2025-09-09,Split Jerk,77.5,kg,1,2,,3,1,37,2,2,Set 4
+314,2025-09-09,Split Jerk,75.0,kg,1,2,,3,1,37,2,2,Set 5
+315,2025-09-09,Overhead Press,55.0,kg,1,2,,3,1,37,2,2,Set 1
+316,2025-09-09,Overhead Press,52.5,kg,1,2,,3,1,37,2,2,Set 2
+317,2025-09-09,Overhead Press,55.0,kg,1,2,,3,1,37,2,2,Set 3
+318,2025-09-09,Overhead Press,55.0,kg,1,1,,3,1,37,2,2,Set 1
+319,2025-09-09,Overhead Press,57.5,kg,1,1,,3,1,37,2,2,Set 2
+320,2025-09-09,Overhead Press,57.5,kg,1,1,,3,1,37,2,2,Set 3
+321,2025-09-09,Weighted Chin-Up (Pause 2s),8.0,kg,1,5,,3,1,37,2,2,Set 1
+322,2025-09-09,Weighted Chin-Up (Pause 2s),10.0,kg,1,5,,3,1,37,2,2,Set 2
+323,2025-09-09,Weighted Chin-Up (Pause 2s),10.0,kg,1,5,,3,1,37,2,2,Set 3
+324,2025-09-09,Weighted Chin-Up (Pause 2s),10.0,kg,1,5,,3,1,37,2,2,Set 4
+325,2025-09-09,Weighted Chin-Up (Pause 2s),10.0,kg,1,5,,3,1,37,2,2,Set 5
+326,2025-09-09,Aerobic Base Conditioning (BikeErg + Wall Balls + Wall Walks + Toes-to-Bar),28.28,min,1,,,3,1,37,2,2,Lap1: 08:16 | Lap2: 09:32 | Lap3: 10:40
+327,2025-09-12,Tall Clean,40.0,kg,1,3,,3,1,37,3,3,Set 1
+328,2025-09-12,Tall Clean,40.0,kg,1,3,,3,1,37,3,3,Set 2
+329,2025-09-12,Tall Clean,40.0,kg,1,3,,3,1,37,3,3,Set 3
+330,2025-09-12,Knee Level Clean from Blocks,65.0,kg,1,3,,3,1,37,3,3,Set 1
+331,2025-09-12,Knee Level Clean from Blocks,65.0,kg,1,3,,3,1,37,3,3,Set 2
+332,2025-09-12,Knee Level Clean from Blocks,67.5,kg,1,3,,3,1,37,3,3,Set 3
+333,2025-09-12,Knee Level Clean from Blocks,67.5,kg,1,3,,3,1,37,3,3,Set 4
+334,2025-09-12,Knee Level Clean from Blocks,67.5,kg,1,3,,3,1,37,3,3,Set 5
+335,2025-09-12,Deadlift,125.0,kg,1,3,,3,1,37,3,3,Set 1
+336,2025-09-12,Deadlift,125.0,kg,1,3,,3,1,37,3,3,Set 2
+337,2025-09-12,Deadlift,125.0,kg,1,3,,3,1,37,3,3,Set 3
+338,2025-09-12,Deadlift,125.0,kg,1,3,,3,1,37,3,3,Set 4
+339,2025-09-12,Deadlift,125.0,kg,1,3,,3,1,37,3,3,Set 5
+340,2025-09-12,"Partner WOD - MAX (Pull-Ups, S2OH, Push-Ups, Lunges)",23.0,min,1,,,3,1,37,3,3,"7 rounds + 19 S2OH into 8th round. Share per round: 10 Pull-Ups, 9 S2OH @42.5kg, 19 Push-Ups. Cash Out: 1992m Weighted Vest Run"
+341,2025-09-13,Jump to Hollow,,,1,5,,3,1,37,4,4,Set 1
+342,2025-09-13,Jump to Hollow,,,1,5,,3,1,37,4,4,Set 2
+343,2025-09-13,Jump to Hollow,,,1,5,,3,1,37,4,4,Set 3
+344,2025-09-13,Bar Swings,,,1,10,,3,1,37,4,4,Set 1
+345,2025-09-13,Bar Swings,,,1,10,,3,1,37,4,4,Set 2
+346,2025-09-13,Bar Swings,,,1,10,,3,1,37,4,4,Set 3
+347,2025-09-13,Bar Muscle-Up Complex (Swing + Hip to Bar + BMU),,,1,1+1+1,,3,1,37,4,4,Set 1
+348,2025-09-13,Bar Muscle-Up Complex (Swing + Hip to Bar + BMU),,,1,1+1+1,,3,1,37,4,4,Set 2
+349,2025-09-13,Bar Muscle-Up Complex (Swing + Hip to Bar + BMU),,,1,1+1+1,,3,1,37,4,4,Set 3
+350,2025-09-13,Bar Muscle-Up Complex (Swing + Hip to Bar + BMU),,,1,1+1+1,,3,1,37,4,4,Set 4
+351,2025-09-13,Bar Muscle-Up Complex (Swing + Hip to Bar + BMU),,,1,1+1+1,,3,1,37,4,4,Set 5
+352,2025-09-13,Bench Press,67.5,kg,1,5,,3,1,37,4,4,Set 1
+353,2025-09-13,Bench Press,70.0,kg,1,3,,3,1,37,4,4,Set 2
+354,2025-09-13,Bench Press,72.5,kg,1,3,,3,1,37,4,4,Set 3
+355,2025-09-13,Bench Press,72.5,kg,1,3,,3,1,37,4,4,Set 4
+356,2025-09-13,Bench Press,75.0,kg,1,3,,3,1,37,4,4,Set 5
+357,2025-09-13,One-Handed DB Row,22.5,kg,1,8+8,,3,1,37,4,4,Set 1
+358,2025-09-13,One-Handed DB Row,24.0,kg,1,8+8,,3,1,37,4,4,Set 2
+359,2025-09-13,One-Handed DB Row,24.0,kg,1,8+8,,3,1,37,4,4,Set 3
+360,2025-09-13,One-Handed DB Row,24.0,kg,1,8+8,,3,1,37,4,4,Set 4
+361,2025-09-13,One-Handed DB Row,24.0,kg,1,8+8,,3,1,37,4,4,Set 5
+362,2025-09-13,EMOM Conditioning - Double-Unders,20.0,reps,1,20,,3,1,37,4,4,Round 1
+363,2025-09-13,EMOM Conditioning - Chest-to-Bar Pull-Ups,12.0,reps,1,12,,3,1,37,4,4,Round 1
+364,2025-09-13,EMOM Conditioning - Devil Press (2x22.5kg),6.0,reps,1,6,,3,1,37,4,4,Round 1
+365,2025-09-13,EMOM Conditioning - Double-Unders,20.0,reps,1,20,,3,1,37,4,4,Round 2
+366,2025-09-13,EMOM Conditioning - Chest-to-Bar Pull-Ups,12.0,reps,1,12,,3,1,37,4,4,Round 2
+367,2025-09-13,EMOM Conditioning - Devil Press (2x22.5kg),6.0,reps,1,6,,3,1,37,4,4,Round 2
+368,2025-09-13,EMOM Conditioning - Double-Unders,20.0,reps,1,20,,3,1,37,4,4,Round 3
+369,2025-09-13,EMOM Conditioning - Chest-to-Bar Pull-Ups,12.0,reps,1,12,,3,1,37,4,4,Round 3
+370,2025-09-13,EMOM Conditioning - Devil Press (2x22.5kg),6.0,reps,1,6,,3,1,37,4,4,Round 3
+371,2025-09-13,EMOM Conditioning - Double-Unders,20.0,reps,1,20,,3,1,37,4,4,Round 4
+372,2025-09-13,EMOM Conditioning - Chest-to-Bar Pull-Ups,12.0,reps,1,12,,3,1,37,4,4,Round 4
+373,2025-09-13,EMOM Conditioning - Devil Press (2x22.5kg),6.0,reps,1,6,,3,1,37,4,4,Round 4
+374,2025-09-13,EMOM Conditioning - Double-Unders,20.0,reps,1,20,,3,1,37,4,4,Round 5
+375,2025-09-13,EMOM Conditioning - Chest-to-Bar Pull-Ups,12.0,reps,1,12,,3,1,37,4,4,Round 5
+376,2025-09-13,EMOM Conditioning - Devil Press (2x22.5kg),6.0,reps,1,6,,3,1,37,4,4,Round 5
+377,2025-09-15,Hip Snatch + Balance + Overhead Squat,30.0,kg,1,1+1+1,,3,2,38,1,17,Set 1
+378,2025-09-15,Hip Snatch + Balance + Overhead Squat,30.0,kg,2,1+1+1,,3,2,38,1,17,Set 2
+379,2025-09-15,Hip Snatch + Balance + Overhead Squat,40.0,kg,3,1+1+1,,3,2,38,1,17,Set 3
+380,2025-09-15,Hip Snatch + Balance + Overhead Squat,40.0,kg,4,1+1+1,,3,2,38,1,17,Set 4
+381,2025-09-15,3 Position Snatch Complex,42.5,kg,1,1+1+1,,3,2,38,1,17,High Hang + Hang + Full Snatch
+382,2025-09-15,3 Position Snatch Complex,45.0,kg,2,1+1+1,,3,2,38,1,17,High Hang + Hang + Full Snatch
+383,2025-09-15,3 Position Snatch Complex,47.5,kg,3,1+1+1,,3,2,38,1,17,High Hang + Hang + Full Snatch
+384,2025-09-15,3 Position Snatch Complex,47.5,kg,4,1+1+1,,3,2,38,1,17,High Hang + Hang + Full Snatch
+385,2025-09-15,3 Position Snatch Complex,47.5,kg,5,1+1+1,,3,2,38,1,17,High Hang + Hang + Full Snatch
+386,2025-09-15,3 Position Snatch Complex,47.5,kg,6,1+1+1,,3,2,38,1,17,High Hang + Hang + Full Snatch
+387,2025-09-15,Back Squat,95.0,kg,1,2,,3,2,38,1,17,3x2 block
+388,2025-09-15,Back Squat,95.0,kg,2,2,,3,2,38,1,17,3x2 block
+389,2025-09-15,Back Squat,95.0,kg,3,2,,3,2,38,1,17,3x2 block
+390,2025-09-15,Back Squat,100.0,kg,1,1,,3,2,38,1,17,3x1 block
+391,2025-09-15,Back Squat,105.0,kg,2,1,,3,2,38,1,17,3x1 block
+392,2025-09-15,Back Squat,105.0,kg,3,1,,3,2,38,1,17,3x1 block
+393,2025-09-15,Romanian Deadlift,110.0,kg,1,8,6.0,3,2,38,1,17,
+394,2025-09-15,Romanian Deadlift,110.0,kg,2,8,6.0,3,2,38,1,17,
+395,2025-09-15,Romanian Deadlift,110.0,kg,3,8,6.0,3,2,38,1,17,
+396,2025-09-15,Romanian Deadlift,115.0,kg,4,8,7.0,3,2,38,1,17,
+397,2025-09-15,Conditioning - Anaerobic Respiration,11.0,min,,,,3,2,38,1,17,"AMRAP 3min | Rest 1.5min x4
+Thrusters 40kg + 10 Burpees over bar + Assault Bike
+Round 1: 1:52 | 20.1 cal | 1034.3 m
+Round 2: 1:44 | 21.3 cal | 1037.0 m
+Round 3: 1:43 | 19.1 cal | 993.9 m
+Round 4: 1:31 | 14.0 cal | 816.0 m"
+398,2025-09-15,Front Rack Hold,30.0,sec,1,1,,3,2,38,1,17,3 rounds | 110kg hold
+399,2025-09-15,Turkish Sit-Up,12.0,kg,3,10/side,,3,2,38,1,17,3 rounds | Single Arm Turkish Sit-Up
+400,2025-09-17,Jerk Balance,40.0,kg,1,3,,3,2,38,2,17,Set 1
+401,2025-09-17,Jerk Balance,40.0,kg,2,3,,3,2,38,2,17,Set 2
+402,2025-09-17,Jerk Balance,40.0,kg,3,3,,3,2,38,2,17,Set 3
+403,2025-09-17,Split Jerk,70.0,kg,1,3,,3,2,38,2,17,Set 1
+404,2025-09-17,Split Jerk,70.0,kg,2,3,,3,2,38,2,17,Set 2
+405,2025-09-17,Split Jerk,75.0,kg,3,2,,3,2,38,2,17,Set 3
+406,2025-09-17,Split Jerk,77.5,kg,4,2,,3,2,38,2,17,Set 4
+407,2025-09-17,Split Jerk,77.5,kg,5,2,,3,2,38,2,17,Set 5
+408,2025-09-17,Overhead Press,55.0,kg,1,2,,3,2,38,2,17,3x2 block
+409,2025-09-17,Overhead Press,57.5,kg,2,2,,3,2,38,2,17,3x2 block
+410,2025-09-17,Overhead Press,57.5,kg,3,2,,3,2,38,2,17,3x2 block
+411,2025-09-17,Overhead Press,60.0,kg,1,1,,3,2,38,2,17,3x1 block
+412,2025-09-17,Overhead Press,60.0,kg,2,1,,3,2,38,2,17,3x1 block
+413,2025-09-17,Overhead Press,62.5,kg,3,1,,3,2,38,2,17,3x1 block
+414,2025-09-17,Weighted Chin-Up (Pause 2s),10.0,kg,1,5,,3,2,38,2,17,
+415,2025-09-17,Weighted Chin-Up (Pause 2s),12.0,kg,2,5,,3,2,38,2,17,
+416,2025-09-17,Weighted Chin-Up (Pause 2s),12.0,kg,3,5,,3,2,38,2,17,
+417,2025-09-17,Weighted Chin-Up (Pause 2s),12.0,kg,4,5,,3,2,38,2,17,
+418,2025-09-17,Weighted Chin-Up (Pause 2s),12.0,kg,5,5,,3,2,38,2,17,
+419,2025-09-17,Conditioning - Aerobic Base,35.0,min,,,,3,2,38,2,17,"AMRAP FOR 35min
+200m Run + 16 Alt DB Snatch (22.5kg) + 200m Run + 12 TTB + 200m Run + 4 Wall Walks
+Results:
+Round 1: 04:31
+Round 2: 04:52
+Round 3: 04:43
+Round 4: 05:10
+Round 5: 05:16
+Round 6: 05:45
+Round 7: 04:43 (stopped before Wall Walks)"
+420,2025-09-19,Competition - Event 1,16.67,min,,,,3,2,38,3,17,"Northern Knights Throwdown - For Time (cap 19:00)
+40 cal Assault Bike → 30 Shuttle Runs → 35 Sandbag Cleans (40kg) → 30 Shuttle Runs → 40 cal Assault Bike
+Result: 16:40"
+421,2025-09-19,Competition - Event 2 (The Berserker),15.0,rounds+reps,,,,3,2,38,3,17,"9-min AMRAP ascending ladder (3-6-9-12...)
+DB Hang Clean & Jerk, Burpee Box Jumps, DB Lunges
+Result: Finished full 15s + 41 reps (4 lunges short of 18s)"
+422,2025-09-19,Competition - Event 3 Part A (The Throne),12.0,min,,,,3,2,38,3,17,"For Time (cap 12:00)
+Row / Thrusters (40–50–60kg) / TTB / C2B / BMU
+Result: Time capped at 60kg thruster (no reps completed at that load)"
+423,2025-09-19,Competition - Event 3 Part B (The Throne Complex),70.0,kg,,,,3,2,38,3,17,"6-min max complex: Clean + Hang Clean + Jerk
+Best lift: 70kg"
+424,2025-09-19,Competition - Northern Knights Throwdown Overall Placement,3.0,place,,,,3,2,38,3,17,"Finished 3rd overall in competition (3 events: For Time, The Berserker, The Throne A+B)"
+425,2025-09-20,Jump to Hollow,,,1,5,,3,2,38,4,17,Set 1
+426,2025-09-20,Jump to Hollow,,,2,5,,3,2,38,4,17,Set 2
+427,2025-09-20,Jump to Hollow,,,3,5,,3,2,38,4,17,Set 3
+428,2025-09-20,Bar Swings,,,1,10,,3,2,38,4,17,Set 1
+429,2025-09-20,Bar Swings,,,2,10,,3,2,38,4,17,Set 2
+430,2025-09-20,Bar Swings,,,3,10,,3,2,38,4,17,Set 3
+431,2025-09-20,Bar Swing + Hip to Bar + Bar Muscle-Up,,,1,1+1+1,,3,2,38,4,17,Set 1
+432,2025-09-20,Bar Swing + Hip to Bar + Bar Muscle-Up,,,2,1+1+1,,3,2,38,4,17,Set 2
+433,2025-09-20,Bar Swing + Hip to Bar + Bar Muscle-Up,,,3,1+1+1,,3,2,38,4,17,Set 3
+434,2025-09-20,Bar Swing + Hip to Bar + Bar Muscle-Up,,,4,1+1+1,,3,2,38,4,17,Set 4
+435,2025-09-20,Bar Swing + Hip to Bar + Bar Muscle-Up,,,5,1+1+1,,3,2,38,4,17,Set 5
+436,2025-09-20,Bench Press,67.5,kg,1,3,,3,2,38,4,17,Set 1
+437,2025-09-20,Bench Press,70.0,kg,2,3,,3,2,38,4,17,Set 2
+438,2025-09-20,Bench Press,72.5,kg,3,3,,3,2,38,4,17,Set 3
+439,2025-09-20,Bench Press,72.5,kg,4,3,,3,2,38,4,17,Set 4
+440,2025-09-20,Bench Press,75.0,kg,5,3,,3,2,38,4,17,Set 5
+441,2025-09-20,One-Handed DB Row,24.0,kg,1,8+8,,3,2,38,4,17,Set 1
+442,2025-09-20,One-Handed DB Row,24.0,kg,2,8+8,,3,2,38,4,17,Set 2
+443,2025-09-20,One-Handed DB Row,24.0,kg,3,8+8,,3,2,38,4,17,Set 3
+444,2025-09-20,One-Handed DB Row,24.0,kg,4,8+8,,3,2,38,4,17,Set 4
+445,2025-09-20,One-Handed DB Row,24.0,kg,5,8+8,,3,2,38,4,17,Set 5
+446,2025-09-20,AMRAP 35 Min Team Workout,,,,,,3,2,38,4,17,"Team of 2 | 35 min AMRAP: 400m Row, 100m D-Ball Carry (60/40kg), 400m Row, 40 OH Lunges (22.5/15kg), 400m Row, 6 Rope Climbs"
+447,2025-09-22,Hip Snatch + Balance + Overhead Squat,30.0,kg,1,1+1+1,,3,3,39,1,,Set 1
+448,2025-09-22,Hip Snatch + Balance + Overhead Squat,40.0,kg,2,1+1+1,,3,3,39,1,,Set 2
+449,2025-09-22,Hip Snatch + Balance + Overhead Squat,40.0,kg,3,1+1+1,,3,3,39,1,,Set 3
+450,2025-09-22,Hip Snatch + Balance + Overhead Squat,40.0,kg,4,1+1+1,,3,3,39,1,,Set 4
+451,2025-09-22,3-Position Snatch Complex (High Hang + Hang + Full Snatch),45.0,kg,1,1+1+1,,3,3,39,1,,Set 1
+452,2025-09-22,3-Position Snatch Complex (High Hang + Hang + Full Snatch),45.0,kg,2,1+1+1,,3,3,39,1,,Set 2
+453,2025-09-22,3-Position Snatch Complex (High Hang + Hang + Full Snatch),47.5,kg,3,1+1+1,,3,3,39,1,,Set 3
+454,2025-09-22,3-Position Snatch Complex (High Hang + Hang + Full Snatch),47.5,kg,4,1+1+1,,3,3,39,1,,Set 4
+455,2025-09-22,3-Position Snatch Complex (High Hang + Hang + Full Snatch),47.5,kg,5,1+1+1,,3,3,39,1,,Set 5
+456,2025-09-22,3-Position Snatch Complex (High Hang + Hang + Full Snatch),47.5,kg,6,1+1+1,,3,3,39,1,,Set 6
+457,2025-09-22,Back Squat,100.0,kg,1,2,,3,3,39,1,,Set 1 of 3x2
+458,2025-09-22,Back Squat,100.0,kg,2,2,,3,3,39,1,,Set 2 of 3x2
+459,2025-09-22,Back Squat,100.0,kg,3,2,,3,3,39,1,,Set 3 of 3x2
+460,2025-09-22,Back Squat,105.0,kg,1,1,,3,3,39,1,,Set 1 of 3x1
+461,2025-09-22,Back Squat,107.5,kg,2,1,,3,3,39,1,,Set 2 of 3x1
+462,2025-09-22,Back Squat,107.5,kg,3,1,,3,3,39,1,,Set 3 of 3x1
+463,2025-09-22,Romanian Deadlift,110.0,kg,1,8,,3,3,39,1,,RPE 6-7
+464,2025-09-22,Romanian Deadlift,110.0,kg,2,8,,3,3,39,1,,RPE 6-7
+465,2025-09-22,Romanian Deadlift,115.0,kg,3,8,,3,3,39,1,,RPE 6-7
+466,2025-09-22,Romanian Deadlift,115.0,kg,4,8,,3,3,39,1,,RPE 6-7
+467,2025-09-22,Anaerobic Conditioning - AMRAP 3min x5,,cal,,,,3,3,39,1,,"12 Thrusters (40kg), 10 Over-bar Burpees, Max Assault Bike Calories
+Round 1: 15.6 Cal | 930.7 m | 1:44
+Round 2: 15.1 Cal | 914.8 m | 1:46
+Round 3: 12.3 Cal | 752.4 m | 1:29
+Round 4: 11.5 Cal | 754.4 m | 1:30
+Round 5: 10.1 Cal | 667.7 m | 1:20"
+468,2025-09-25,Jerk Balance,40.0,kg,1,3,,3,3,39,2,,Set 1
+469,2025-09-25,Jerk Balance,40.0,kg,2,3,,3,3,39,2,,Set 2
+470,2025-09-25,Jerk Balance,50.0,kg,3,3,,3,3,39,2,,Set 3
+471,2025-09-25,Split Jerk,70.0,kg,1,3,,3,3,39,2,,Set 1
+472,2025-09-25,Split Jerk,70.0,kg,2,3,,3,3,39,2,,Set 2
+473,2025-09-25,Split Jerk,77.5,kg,3,2,,3,3,39,2,,Set 3
+474,2025-09-25,Split Jerk,77.5,kg,4,2,,3,3,39,2,,Set 4
+475,2025-09-25,Split Jerk,77.5,kg,5,2,,3,3,39,2,,Set 5
+476,2025-09-25,Overhead Press,57.5,kg,1,2,,3,3,39,2,,Set 1
+477,2025-09-25,Overhead Press,60.0,kg,2,1,,3,3,39,2,,Set 2
+478,2025-09-25,Overhead Press,57.5,kg,3,2,,3,3,39,2,,Set 3
+479,2025-09-25,Overhead Press,60.0,kg,4,1,,3,3,39,2,,Set 4
+480,2025-09-25,Overhead Press,60.0,kg,5,1,,3,3,39,2,,Set 5
+481,2025-09-25,Overhead Press,60.0,kg,6,1,,3,3,39,2,,Set 6
+482,2025-09-25,Weighted Chin-Up,12.0,kg,1,5,,3,3,39,2,,Pause 2s
+483,2025-09-25,Weighted Chin-Up,16.0,kg,2,5,,3,3,39,2,,Pause 2s
+484,2025-09-25,Weighted Chin-Up,16.0,kg,3,5,,3,3,39,2,,Pause 2s
+485,2025-09-25,Weighted Chin-Up,16.0,kg,4,5,,3,3,39,2,,Pause 2s
+486,2025-09-25,Weighted Chin-Up,16.0,kg,5,5,,3,3,39,2,,Pause 2s
+487,2025-09-25,Aerobic Base Conditioning - E5MOM x8,,min,,,,3,3,39,2,,200m Row + 14 Alt DB Snatch (22.5kg) + 10 C2B Pull-Ups + 6 Burpee Box Jump Overs + 200m Row
+488,2025-09-26,Tall Clean,50.0,kg,1,3,,3,3,39,3,,Set 1
+489,2025-09-26,Tall Clean,50.0,kg,2,3,,3,3,39,3,,Set 2
+490,2025-09-26,Tall Clean,50.0,kg,3,3,,3,3,39,3,,Set 3
+491,2025-09-26,Knee Level Clean from Blocks,65.0,kg,1,3,,3,3,39,3,,Set 1
+492,2025-09-26,Knee Level Clean from Blocks,65.0,kg,2,3,,3,3,39,3,,Set 2
+493,2025-09-26,Knee Level Clean from Blocks,67.5,kg,3,3,,3,3,39,3,,Set 3
+494,2025-09-26,Knee Level Clean from Blocks,67.5,kg,4,3,,3,3,39,3,,Set 4
+495,2025-09-26,Knee Level Clean from Blocks,70.0,kg,5,3,,3,3,39,3,,Set 5
+496,2025-09-26,Deadlift,125.0,kg,1,3,,3,3,39,3,,Set 1
+497,2025-09-26,Deadlift,125.0,kg,2,3,,3,3,39,3,,Set 2
+498,2025-09-26,Deadlift,127.5,kg,3,3,,3,3,39,3,,Set 3
+499,2025-09-26,Deadlift,127.5,kg,4,3,,3,3,39,3,,Set 4
+500,2025-09-26,Deadlift,130.0,kg,5,3,,3,3,39,3,,Set 5
+501,2025-09-26,Work Capacity Conditioning - 5 Rounds,,min,,,,3,3,39,3,,"20 DU + 10 TTB + 10 S2OH (50kg) + 10 TTB + 20 DU
+Results:
+R1: 3:23
+R2: 2:50
+R3: 2:41
+R4: 3:56
+R5: 4:38"
+502,2025-09-27,Jump to Hollow,,,1,5,,3,2,38,4,,Set 1
+503,2025-09-27,Jump to Hollow,,,2,5,,3,2,38,4,,Set 2
+504,2025-09-27,Jump to Hollow,,,3,5,,3,2,38,4,,Set 3
+505,2025-09-27,Bar Swings,,,1,10,,3,2,38,4,,Set 1
+506,2025-09-27,Bar Swings,,,2,10,,3,2,38,4,,Set 2
+507,2025-09-27,Bar Swings,,,3,10,,3,2,38,4,,Set 3
+508,2025-09-27,Bar Swing + Hip to Bar + Bar Muscle-Up,,,1,1+1+1,,3,2,38,4,,Set 1
+509,2025-09-27,Bar Swing + Hip to Bar + Bar Muscle-Up,,,2,1+1+1,,3,2,38,4,,Set 2
+510,2025-09-27,Bar Swing + Hip to Bar + Bar Muscle-Up,,,3,1+1+1,,3,2,38,4,,Set 3
+511,2025-09-27,Bar Swing + Hip to Bar + Bar Muscle-Up,,,4,1+1+1,,3,2,38,4,,Set 4
+512,2025-09-27,Bar Swing + Hip to Bar + Bar Muscle-Up,,,5,1+1+1,,3,2,38,4,,Set 5
+513,2025-09-27,Bench Press,70.0,kg,1,3,,3,2,38,4,,Set 1
+514,2025-09-27,Bench Press,72.5,kg,2,3,,3,2,38,4,,Set 2
+515,2025-09-27,Bench Press,72.5,kg,3,3,,3,2,38,4,,Set 3
+516,2025-09-27,Bench Press,75.0,kg,4,3,,3,2,38,4,,Set 4
+517,2025-09-27,Bench Press,75.0,kg,5,3,,3,2,38,4,,Set 5
+518,2025-09-27,One-Handed DB Row,28.0,kg,1,8+8,,3,2,38,4,,Set 1
+519,2025-09-27,One-Handed DB Row,28.0,kg,2,8+8,,3,2,38,4,,Set 2
+520,2025-09-27,One-Handed DB Row,28.0,kg,3,8+8,,3,2,38,4,,Set 3
+521,2025-09-27,One-Handed DB Row,28.0,kg,4,8+8,,3,2,38,4,,Set 4
+522,2025-09-27,One-Handed DB Row,28.0,kg,5,8+8,,3,2,38,4,,Set 5
+523,2025-09-27,Jump to Hollow,,,1,5,,3,3,39,4,,Set 1
+524,2025-09-27,Jump to Hollow,,,2,5,,3,3,39,4,,Set 2
+525,2025-09-27,Jump to Hollow,,,3,5,,3,3,39,4,,Set 3
+526,2025-09-27,Bar Swings,,,1,10,,3,3,39,4,,Set 1
+527,2025-09-27,Bar Swings,,,2,10,,3,3,39,4,,Set 2
+528,2025-09-27,Bar Swings,,,3,10,,3,3,39,4,,Set 3
+529,2025-09-27,Bar Swing + Hip to Bar + Bar Muscle-Up,,,1,1+1+1,,3,3,39,4,,Set 1
+530,2025-09-27,Bar Swing + Hip to Bar + Bar Muscle-Up,,,2,1+1+1,,3,3,39,4,,Set 2
+531,2025-09-27,Bar Swing + Hip to Bar + Bar Muscle-Up,,,3,1+1+1,,3,3,39,4,,Set 3
+532,2025-09-27,Bar Swing + Hip to Bar + Bar Muscle-Up,,,4,1+1+1,,3,3,39,4,,Set 4
+533,2025-09-27,Bar Swing + Hip to Bar + Bar Muscle-Up,,,5,1+1+1,,3,3,39,4,,Set 5
+534,2025-09-27,Bench Press,70.0,kg,1,3,,3,3,39,4,,Set 1
+535,2025-09-27,Bench Press,72.5,kg,2,3,,3,3,39,4,,Set 2
+536,2025-09-27,Bench Press,72.5,kg,3,3,,3,3,39,4,,Set 3
+537,2025-09-27,Bench Press,75.0,kg,4,3,,3,3,39,4,,Set 4
+538,2025-09-27,Bench Press,75.0,kg,5,3,,3,3,39,4,,Set 5
+539,2025-09-27,One-Handed DB Row,28.0,kg,1,8+8,,3,3,39,4,,Set 1
+540,2025-09-27,One-Handed DB Row,28.0,kg,2,8+8,,3,3,39,4,,Set 2
+541,2025-09-27,One-Handed DB Row,28.0,kg,3,8+8,,3,3,39,4,,Set 3
+542,2025-09-27,One-Handed DB Row,28.0,kg,4,8+8,,3,3,39,4,,Set 4
+543,2025-09-27,One-Handed DB Row,28.0,kg,5,8+8,,3,3,39,4,,Set 5
+544,2025-09-27,Classic Metcon,792.0,sec,,,,3,3,39,4,,"FOR TIME: 400m Run, 30m DB Front Rack Lunges (22.5kg x1), 9 Wall Walks, 400m Run, 20m DB Front Rack Lunges (22.5kg x1), 7 Wall Walks, 400m Run, 10m DB Front Rack Lunges (22.5kg x1), 5 Wall Walks"
+545,2025-09-28,Hip Snatch + Balance + Overhead Squat,40.0,kg,4,1+1+1,,3,4,40,1,1,All sets completed at 40kg as prescribed.
+546,2025-09-28,3-Position Snatch Complex (High Hang + Hang + Full Snatch),50.0,kg,6,1+1+1,,3,4,40,1,1,Set1:45kg | Set2:47.5kg | Set3:47.5kg | Set4:47.5kg | Set5:50kg | Set6:50kg
+547,2025-09-28,Back Squat,110.0,kg,5,"5,2,1,1,1",,3,4,40,1,1,Set1:5@60kg | Set2:2@80kg | Set3:1@90kg | Set4:1@105kg | Set5:1@110kg
+548,2025-09-28,Romanian Deadlift,115.0,kg,4,8,,3,4,40,1,1,Set1:110kg | Set2:115kg | Set3:115kg | Set4:115kg
+549,2025-09-28,"Conditioning - For Time (21-15-9 Thrusters 40kg, Over-Bar Burpees, Assault Bike)",12.09,min,,,,3,4,40,1,1,"Thrusters (40kg), Over-Bar Burpees, Assault Bike calories. Completed in 12:09."
+550,2025-09-28,Core - Front Rack Hold + Turkish Sit-Up,,,3,30s Hold + 10/side,,3,4,40,1,1,3 rounds superset | Front Rack Hold 110-120kg x30s + Turkish Sit-Up 10/side @10-12kg
+551,2025-09-30,Jerk Balance,50.0,kg,3,3,,3,4,40,2,2,Set1:40kg | Set2:50kg | Set3:50kg
+552,2025-09-30,Split Jerk,77.5,kg,5,"3,3,2,2,2",,3,4,40,2,2,Set1:3@70kg | Set2:3@70kg | Set3:2@77.5kg | Set4:2@77.5kg | Set5:2@77.5kg
+553,2025-09-30,Overhead Press,67.5,kg,4,1,,3,4,40,2,2,Set1:1@60kg | Set2:1@62.5kg | Set3:1@65kg | Set4:1@67.5kg
+554,2025-09-30,Conditioning - Aerobic Base E5MOM,,,35 min,,,3,4,40,2,2,"Every 5 min: 10 Box Jumps, 30m D-Ball Carry (60kg), 5 Wall Walks, 30m D-Ball Carry (60kg), 10 Box Jumps. Remaining time: BikeErg @ ~70% effort."
+555,2025-10-03,Tall Clean,50.0,kg,3,3,,3,4,40,3,3,All sets at 50kg (technique drill)
+556,2025-10-03,Knee Level Clean from Blocks,75.0,kg,5,3,,3,4,40,3,3,Set1:65kg | Set2:70kg | Set3:70kg | Set4:75kg | Set5:75kg
+557,2025-10-03,Deadlift,150.0,kg,4,"5,3,1,3",,3,4,40,3,3,Set1:5@100kg | Set2:3@120kg | Set3:1@140kg | Set4:3@150kg
+558,2025-10-03,Conditioning - EMOM 15min,,,15 min,,,3,4,40,3,3,EMOM: Min1 – 30 Double Unders | Min2 – 10-12 Dual DB Push Press (2x20kg) | Min3 – 10 Deadlifts (80kg)
+559,2025-10-04,Gymnastics - Jump to Hollow / Bar Swings / Bar Muscle-Up Complex,,,3 / 3 / 5,,,3,4,40,4,4,Jump to Hollow 3x5 | Bar Swings 3x10 | Bar Swing + Hip to Bar + Bar Muscle-Up 5x(1+1+1)
+560,2025-10-04,Bench Press,75.0,kg,5,"3,3,3,2,3",,3,4,40,4,4,Set1:3@72.5kg | Set2:3@72.5kg | Set3:3@75kg | Set4:2@75kg | Set5:3@75kg
+561,2025-10-04,One-Handed DB Row,32.0,kg,5,8+8,,3,4,40,4,4,Set1:28kg | Set2:32kg | Set3:32kg | Set4:32kg | Set5:32kg
+562,2025-10-04,Classic Metcon - Run/Wall Ball/Toes-to-Bar,9.05,min,,,,3,4,40,4,4,"For Time: 400m Run, 30-20-10 Wall Ball (10kg) and Toes-to-Bar | Time: 09:05"
+563,2025-10-06,Muscle Snatch + Hip Snatch + Snatch Balance,35.0,kg,3,1+1+1,,4,1,41,1,,"Set 1: 30kg, Set 2: 35kg, Set 3: 35kg"
+564,2025-10-06,Snatch Pause (at bottom),45.0,kg,6,2,,4,1,41,1,,"Set 1: 40kg, Sets 2-6: 45kg"
+565,2025-10-06,Front Squat,75.0,kg,5,4,8.0,4,1,41,1,,"Set 1: 70kg, Set 2: 72.5kg, Sets 3-5: 75kg"
+566,2025-10-06,Good Morning,45.0,kg,3,10,7.0,4,1,41,1,,3x10 @ 45kg
+567,2025-10-06,Conditioning – 5 Rounds AFAP,15.35,min,5,,9.0,4,1,41,1,,"10 cal Row + 9 Over-bar Burpees + 6 Power Cleans @65kg | Rounds: 1:46, 2:03, 1:53, 1:48, 1:51 | Total Working Time: 15:21"
+568,2025-10-06,Core Superset (Hanging Tuck Hold + GHD Hip Extensions),3.0,rounds,3,,,4,1,41,1,,3 rounds alternating Hanging Tuck Hold (20–30s) and GHD Hip Extensions (12–15 reps)
+569,2025-10-08,Behind the Neck Jerk,40.0,kg,3,3,,4,1,41,2,,"Tempo 020 | Set 1: 40kg, Set 2: 40kg, Set 3: 40kg"
+570,2025-10-08,Split Jerk,80.0,kg,6,2/1,,4,1,41,2,,"3x2 @70–72.5kg, 3x1 @77.5–80kg"
+571,2025-10-08,Strict Handstand Push-Up (to ABMAT),,,5,5,,4,1,41,2,,Completed 5x5 bodyweight reps
+572,2025-10-08,Bent Over Rows,22.5,kg,5,6,8.0,4,1,41,2,,"Set 1: 18kg, Set 2: 20kg, Sets 3–5: 22.5kg"
+573,2025-10-08,Aerobic Base Conditioning – 35-Min AMRAP,35.0,min,,,,4,1,41,2,,"400m BikeErg + 16 Wall Balls (6kg) + 400m BikeErg + 12 Box Jump Overs + 400m BikeErg + 3 Bar Muscle-Ups | Rounds: 1: 4:36, 2: 4:15, 3: 4:19, 4: 4:21, 5: 4:08, 6: 4:15, 7: 4:20, 8: 4:27, 9: 0:25 (100m bike)"
+574,2025-10-09,Clean Pull + High Hang Clean + Clean,40.0,kg,3,1+1+1,,4,1,41,3,,"Set 1: 40kg, Set 2: 40kg, Set 3: 40kg"
+575,2025-10-09,Power Clean + Clean (Tempo 020 @ Pause at Bottom),70.0,kg,6,1+1,,4,1,41,3,,"Set 1: 65kg, Set 2: 67.5kg, Set 3: 67.5kg, Set 4: 70kg, Set 5: 70kg, Set 6: 70kg"
+576,2025-10-09,Deficit Clean Pull (20 Plate),87.5,kg,4,5,,4,1,41,3,,"Set 1: 80kg, Set 2: 85kg, Set 3: 85kg, Set 4: 87.5kg"
+577,2025-10-09,EMOM 15 – Skill / Work Capacity Conditioning,15.0,min,,,,4,1,41,3,,"15-min EMOM alternating: A) 30–40 Double Unders, B) 12–15 Toes-to-Bar, C) 12–14 Front Rack Lunges @40kg"
+578,2025-10-11,Jump to Hollow,,,3,5,,4,1,41,4,,3 sets of 5 Jump to Hollow reps focusing on tight arch-to-hollow transition
+579,2025-10-11,Bar Swings,,,3,10,,4,1,41,4,,3 sets of 10 bar swings for kip timing and lat engagement
+580,2025-10-11,Bar Swing + Hip to Bar + Bar Muscle-Up,,,5,1+1+1,,4,1,41,4,,5 sets of (1 Bar Swing + 1 Hip to Bar + 1 Bar Muscle-Up) focusing on smooth transition and hip drive
+581,2025-10-11,Weighted Ring Dips,12.0,kg,5,5,8.0,4,1,41,4,,"Set 1: 8kg, Set 2: 10kg, Sets 3-5: 12kg"
+582,2025-10-11,Chin-Ups,,,3,10,,4,1,41,4,,"3 sets of 10 chin-ups, bodyweight, 2 reps in reserve"
+583,2025-10-11,Classic Metcon – Run + Barbell Complex,17.5,min,,,,4,1,41,4,,"For time: 400m Run, 40 Power Cleans @50kg, 400m Run, 40 Front Squats, 400m Run, 40 Shoulder to Overhead | Result: 17:30"
+584,2025-10-13,Muscle Snatch + Hip Snatch + Snatch Balance,40.0,kg,3,1+1+1,,4,2,42,1,,"30kg, 35kg, 40kg across sets"
+585,2025-10-13,Snatch Pause (at bottom),47.5,kg,6,2,,4,2,42,1,,"45kg × 3 sets, 47.5kg × 3 sets"
+586,2025-10-13,Front Squat,80.0,kg,3,"varied (2,2,1)",,4,2,42,1,,"75kg×2, 77.5kg×2, 80kg×1"
+587,2025-10-13,Good Morning,50.0,kg,3,10,7.5,4,2,42,1,,"45kg, 47.5kg, 50kg across sets"
+588,2025-10-13,Conditioning – Anaerobic Respiration,15.08,min,5,1 round,,4,2,42,1,,"5 Rounds AFAP / 1:30 rest; 12 cal Assault Bike, 9 Box Jump Overs, 6 Clean & Jerks @ 62.5kg. Round times: 02:41, 03:13, 02:49, 02:56, 03:29"
+589,2025-10-15,Behind the Neck Jerk,40.0,kg,3,3,,4,2,42,2,,3 sets of 3 reps @ 40kg
+590,2025-10-15,Split Jerk,82.5,kg,6,"varied (2,2,2,1,1,1)",,4,2,42,2,,Sets 1–3: 2 reps @ 72.5–75kg | Sets 4–5: 1 rep @ 77.5–80kg | Set 6: 1 rep @ 82.5kg (completed)
+591,2025-10-15,Strict Handstand Push-Up (to ABMAT),,,5,5,,4,2,42,2,,All 5 sets completed successfully
+592,2025-10-15,Bent Over Row,30.0,kg,5,6,8.0,4,2,42,2,,Set 1: 22.5kg; Sets 2–5: 30kg
+593,2025-10-15,Conditioning – Aerobic Base,,,,,,4,2,42,2,,"Completed full E4MOM ×8: A) 600m Run B) 12 Wall Ball Shots (9kg), 8 Toes to Bar, 4 Wall Walks, 8 Toes to Bar, 12 Wall Ball Shots (9kg)"
+594,2025-10-17,Clean Pull + High Hang Clean + Clean,40.0,kg,3,1+1+1,,4,2,42,3,,3 sets of 1+1+1 @ 40kg
+595,2025-10-17,"Power Clean + Clean (Tempo 020, Pause at Bottom)",75.0,kg,6,1+1,,4,2,42,3,,"70kg, 72.5kg, 75kg ×4 sets"
+596,2025-10-17,Deficit Clean Pull (20kg plate),90.0,kg,5,5,,4,2,42,3,,Completed 4 of 5 sets @ 90kg
+597,2025-10-17,Skill / Work Capacity Conditioning,29.07,min,5,1 round,,4,2,42,3,,"5 rounds for time, rest 1:1; 10 OTB Burpees, 8 C2B, 12 Thrusters (40kg), 8 C2B, 10 OTB Burpees; Round times: 2:56, 2:59, 3:22, 3:25, 3:24"
+598,2025-10-18,Jump to Hollow,,,3,5,,4,2,42,4,,"3 sets of 5 reps, all completed"
+599,2025-10-18,Bar Swings,,,3,10,,4,2,42,4,,"3 sets of 10 reps, all completed"
+600,2025-10-18,Bar Swing + Hip to Bar + Bar Muscle-Up,,,5,1+1+1,,4,2,42,4,,5 sets completed of Bar Swing + Hip to Bar + Bar Muscle-Up
+601,2025-10-18,Weighted Ring Dips,16.0,kg,5,5,8.0,4,2,42,4,,"Sets: 10kg, 12kg×3, 16kg"
+602,2025-10-18,Chin-Ups,,,5,9-10,,4,2,42,4,,"Completed 4 of 5 sets; reps: 9,10,10,10,9"
+603,2025-10-18,Classic Metcon (Run + D-Ball + Wall Walks),18.78,min,,,,4,2,42,4,,"For Time: 400m Run, 15-12-9 D-Ball Cleans (60kg) + 12-9-6 Wall Walks. Result: 18:47"
+604,2025-10-19,Muscle Snatch + Hip Snatch + Snatch Balance,40.0,kg,3,1+1+1,,4,3,43,1,,Completed all 3 sets (30–40 kg).
+605,2025-10-19,Snatch Pause (at bottom),47.5,kg,6,2,,4,3,43,1,,Completed 5/6 sets (missed last at 47.5 kg).
+606,2025-10-19,Front Squat,85.0,kg,5,4,,4,3,43,1,,5×4 @ 80–85 kg completed. Progressed to 85 kg final set.
+607,2025-10-19,Good Morning,50.0,kg,3,10,7.5,4,3,43,1,,"3×10 @ 45–50 kg, RPE 7–8."
+608,2025-10-19,Conditioning – Anaerobic Respiration,17.51,min,5,,,4,3,43,1,,"5 rounds AFAP with 1.5 min rest between. Rounds: 2:18, 2:14, 2:21, 2:18, 2:34. Movements: 12 cal Assault Bike, 9 OTB Burpees, 6 Thrusters (55–60 kg)."
+609,2025-10-19,Core Superset – Hanging Tuck Hold + GHD Hip Extensions,3.0,rounds,3,,,4,3,43,1,,3 Rounds complete: Hanging Tuck Hold 20–30s + GHD Hip Extensions ×12–15
+610,2025-10-21,Behind the Neck Jerk,40.0,kg,3,3,,4,3,43,2,,"Tempo 020, active recovery. All sets completed at 40 kg."
+611,2025-10-21,Split Jerk,85.0,kg,6,2/1,,4,3,43,2,,"Completed 5/6 sets: 3×2 @75 kg, 2×1 @80–82.5 kg, 1×1 @85 kg (missed)."
+612,2025-10-21,Strict Handstand Push-Up,6.0,reps,5,6,,4,3,43,2,,5×6 reps to ABMAT completed.
+613,2025-10-21,Bent Over Row,60.0,kg,5,6,8.0,4,3,43,2,,"5×6 @ 50–60 kg, RPE 8."
+614,2025-10-21,Conditioning – Aerobic Base (E5MOM),35.0,min,7,,,4,3,43,2,,"7×E5MOM: 12 Wall Ball Shots (10 kg), 8 Pull-Ups, 8 Burpee Box Jump Overs, 8 Pull-Ups, 12 Wall Ball Shots (10 kg). Remaining time: BikeErg @70% effort."
+615,2025-10-23,Clean Pull + High Hang Clean + Clean,40.0,kg,3,1+1+1,,4,2,42,3,,Completed 3 sets @ 40 kg.
+616,2025-10-23,Power Clean + Clean (Pause at Bottom),80.0,kg,6,1+1,,4,2,42,3,,"6×(1+1) @ 72.5–80 kg, tempo 020, paused at bottom."
+617,2025-10-23,Deficit Clean Pull,100.0,kg,5,5,,4,2,42,3,,5×5 @ 90–100 kg using 20 kg plates for deficit.
+618,2025-10-23,Skill EMOM – Double-Unders / Bar Muscle-Ups / Box Step Overs,15.0,min,15,,,4,2,42,3,,"EMOM 15 min alternating: A) 30 Double-Unders, B) 4 Bar Muscle-Ups, C) 10 Box Step Overs (2×22.5 kg DB)."
+619,2025-10-25,Jump to Hollow,3.0,sets,3,5,,4,2,42,4,,3×5 Jump to Hollow – completed all sets.
+620,2025-10-25,Bar Swings,3.0,sets,3,10,,4,2,42,4,,3×10 Bar Swings – all sets complete.
+621,2025-10-25,Bar Swing + Hip to Bar + Bar Muscle-Up,5.0,sets,5,1+1+1,,4,2,42,4,,5×(1+1+1) complex – all sets complete.
+622,2025-10-25,Weighted Ring Dip,16.0,kg,5,5,,4,2,42,4,,5×5 @ 16 kg – all sets complete.
+623,2025-10-25,Chin-Up,10.0,reps,5,10,,4,2,42,4,,"5 sets to RIR 2, ~10 reps each. Bodyweight only."
+624,2025-10-25,Classic Metcon – Clean & Jerk + Over-the-Bar Burpees,11.06,min,,,,4,2,42,4,,For Time Ladder 1–10: Clean & Jerk 50 kg + Over-the-Bar Burpees. Time: 11:06.
+625,2025-10-26,Muscle Snatch + Hip Snatch + Snatch Balance,40.0,kg,3,1+1+1,,4,4,44,1,,"3x(1+1+1) @ 30–40kg | Sets: 30, 40, 40 kg"
+626,2025-10-26,Snatch Pause (at bottom),47.5,kg,6,2,,4,4,44,1,,6x2 @ 47.5–50kg | All working sets complete
+627,2025-10-26,Front Squat,85.0,kg,5,4,8.0,4,4,44,1,,"5x4 @ 80–85kg | Completed 3 sets @ 82.5kg, 2 sets @ 85kg"
+628,2025-10-26,Good Morning,55.0,kg,3,10,7.5,4,4,44,1,,"3x10 @ RPE 7–8 | Sets: 50, 50, 55kg"
+629,2025-10-26,Conditioning - Anaerobic Respiration (5R FT),18.57,min,5,,9.0,4,4,44,1,,"5 rounds AFAP / 1.5min rest: 12 cal A.Bike, 9 OTB Burpees, 6 Squat Cleans (60kg). Splits: 2:01, 2:26, 2:42, 2:39, 2:40. Total 18:34."
+630,2025-10-26,Core Superset - Hanging Tuck Hold + GHD Hip Extensions,3.0,rounds,3,,7.0,4,4,44,1,,3 rounds of Hanging Tuck Hold (20–30s) + GHD Hip Extensions (12–15 reps). All rounds complete.
+631,2025-10-27,Behind the Neck Jerk,40.0,kg,3,3,6.0,4,4,44,2,,"3x3 @ 40kg, tempo 020, active recovery focus."
+632,2025-10-27,Split Jerk,80.0,kg,6,2/1,8.0,4,4,44,2,,"3x2 @ 70kg, 3x1 @ 80kg"
+633,2025-10-27,Strict Handstand Push-Up (to ABMAT),6.0,reps,5,6,8.0,4,4,44,2,,5x6 bodyweight strict HSPU to ABMAT. All sets complete.
+634,2025-10-27,Bent Over Row,60.0,kg,5,6,8.0,4,4,44,2,,"5x6 @ RPE 8 | Sets: 69kg, 60kg, 60kg, 60kg, 60kg"
+635,2025-10-27,Conditioning - 35min AMRAP,35.0,min,,,8.0,4,4,44,2,,"AMRAP 35min: 400m BikeErg, 20 WB 10kg, 400m BikeErg, 15 Box Jump Overs 60cm, 400m BikeErg, 5 Bar Muscle-Ups. Rounds: 1-7 full + 386m on round 8. Splits: 4:54, 4:54, 4:51, 4:57, 5:01, 4:47, 4:53, 0:51 partial."
+636,2025-10-30,Clean Pull + High Hang Clean + Clean,40.0,kg,3,1+1+1,7.0,4,4,44,3,,3x(1+1+1) @ 40kg | All sets complete
+637,2025-10-30,Power Clean + Clean (Pause @ Bottom),80.0,kg,6,1+1,8.0,4,4,44,3,,"6x(1+1) @ 75–80kg | Sets: 75, 75, 77.5, 77.5, 77.5, 80kg"
+638,2025-10-30,Deficit Clean Pull,100.0,kg,5,5,8.0,4,4,44,3,,"Deficit Clean Pull on 20 Plate | 5x5 @ 95kg target | Sets: 90, 100, 100, 100, 100kg"
+639,2025-10-30,Skill / Work Capacity Conditioning,3.12,min,5,,9.0,4,4,44,3,,"5 Rounds / 1.5min Rest: 25 DU, 8 TTB, 10 Hang Power Snatch (40kg), 8 TTB, 25 DU. Splits (min): 2:34, 3:25, 3:12, 2:59, 3:32."
+640,2025-11-01,Jump to Hollow,3.0,sets,3,5,6.0,4,2,42,4,,"Gymnastics warm-up, 3x5 jumps to hollow position. Focus on core tension and shoulder activation."
+641,2025-11-01,Bar Swings,3.0,sets,3,10,6.0,4,2,42,4,,3x10 bar swings for kip rhythm practice.
+642,2025-11-01,Bar Swing + Hip to Bar + Bar Muscle-Up,1.0,complex,5,1+1+1,7.0,4,2,42,4,,"5x(1+1+1) complex: Bar Swing, Hip to Bar, Bar Muscle-Up. Full sequence completed each set."
+643,2025-11-01,Weighted Ring Dips,18.5,kg,5,5,8.0,4,2,42,4,,5x5 weighted ring dips @ 14–18.5kg. Last 2 sets at 18.5kg.
+644,2025-11-01,Chin-Ups,10.0,reps,5,RIR2,7.5,4,2,42,4,,"5xRIR2 chin-ups. 4 sets of 10 reps completed, last set missed final rep."
+645,2025-11-01,Classic Metcon - For Time,16.22,min,,,9.0,4,2,42,4,,"For time: 400m Run, 21 Pull-Ups, 21 Power Clean (40kg), 7 Wall Walks, 400m Run, 15 Chest-To-Bar Pull-Ups, 15 Power Clean (50kg), 5 Wall Walks, 400m Run, 9 Bar Muscle-Ups, 9 Power Clean (60kg), 3 Wall Walks. Result: 16:13."
+646,2025-11-03,Hang Power Snatch + Overhead Squat,40.0,kg,3,1+1+1,,5,1,45,1,24,3×(1+1+1): 30–40kg progression
+647,2025-11-03,Knee Pause Snatch + Hang Snatch + Snatch,45.0,kg,4,1+1+1,,5,1,45,1,24,4×(1+1+1): 40–45kg
+648,2025-11-03,Front Squat,85.0,kg,5,3,,5,1,45,1,24,80–85kg progression
+649,2025-11-03,B-Stance Deadlift (DB),18.0,kg,3,8+8 each side,,5,1,45,1,24,Accessory work at RPE 7
+650,2025-11-03,I.W.T – Back Rack Lunges (40kg),26.0,reps,3,max,,5,1,45,1,24,Reps per round: R1 25 / R2 27 / R3 26
+651,2025-11-03,Core Circuit,3.0,rounds,3,complete,,5,1,45,1,24,Landmine Twists ×20 @10kg + Chinese Back Plank ×40sec
+652,2025-11-03,Jerk Balance,40.0,kg,3,3,6.0,5,1,45,2,,"Tempo 020, active recovery"
+653,2025-11-03,Split Jerk,80.0,kg,6,2+1,,5,1,45,2,,3×2 @75kg + 3×1 @80kg
+654,2025-11-03,Spoto Bench Press,60.0,kg,5,5,,5,1,45,2,,50–60kg progression
+655,2025-11-03,Chest-to-Bar Pull-Ups,8.0,reps,5,5,,5,1,45,2,,"5×5 unweighted, strong control"
+656,2025-11-03,E5MOM Aerobic Base Conditioning,55.0,cal,8,rounds,,5,1,45,2,,Each round: 55 cal Row + 20 WB (9kg) + 16 TTB + 12 Burpee Box Jumps
+657,2025-11-09,Hang Power Snatch + Overhead Squat,40.0,kg,3,1+1+1,,5,5,46,1,,Completed all 3 sets at 40kg
+658,2025-11-09,Knee Pause Snatch + Hang Snatch + Snatch,45.0,kg,6,1+1+1,,5,5,46,1,,Completed all 6 sets between 40–45kg
+659,2025-11-09,Front Squat,87.5,kg,5,3,,5,5,46,1,,"Completed 5×3. Sets 1–4 @85kg, Set 5 @87.5kg"
+660,2025-11-09,B-Stance Deadlift,18.0,kg,3,8+8,,5,5,46,1,,"2×DBs. Sets 1 @16kg, Sets 2–3 @18kg. RPE 7"
+661,2025-11-09,I.W.T. – Anaerobic Respiration,,,4,,,5,5,46,1,,4×3min work / 1.5min rest. 15 cal Assault Bike + 12 Box Jump Over (60cm) + Max Back Rack Lunges (40kg). Reps per round: 19 / 21 / 19 / 17
+662,2025-11-09,Core – Landmine Twists + Chinese Back Plank,,,3,,,5,5,46,1,,3 rounds superset: 20 Landmine Twists + 40 sec Chinese Back Plank
+663,2025-11-13,Clean Pull + High Hang Clean + Clean,40.0,kg,3,1+1+1,,5,2,46,2,,Completed 3×(1+1+1) @40kg
+664,2025-11-13,Clean,75.0,kg,6,3×3 + 3×2,,5,2,46,2,,"Sets 1–3 @65kg, Set 4 @70kg, Sets 5–6 @75kg"
+665,2025-11-13,Clean Pull + Power Clean,70.0,kg,5,3+2,,5,2,46,2,,Completed 5×3+2 @70kg
+666,2025-11-13,CINDY – AMRAP 20 min,,,22,,,5,2,46,2,,5 Pull-Ups + 10 Push-Ups + 15 Air Squats. Completed 22 rounds. Split times 0:44–1:04/round.
+667,2025-11-14,Jerk Balance,40.0,kg,3,3,,5,2,46,3,,"Tempo 020, active recovery"
+668,2025-11-14,Split Jerk,75.0,kg,6,3×2 + 3×1,,5,2,46,3,,Sets 1–3: 70–75kg for doubles; Sets 4–6: 70kg singles
+669,2025-11-14,Spoto Bench Press,55.0,kg,5,5,,5,2,46,3,,"Sets 1–2 @50kg, Sets 3–5 @55kg"
+670,2025-11-14,Skill Work Capacity (E3MOM x5),,,5,,,5,2,46,3,,E3MOM × 5 rounds: 30 Double Unders + 6–8 Clean & Jerk (45kg) + 4–5 Bar Muscle-Ups
+671,2025-11-15,Ring Hollow + Arch,,,3,5,,5,2,46,4,,Completed all 3 sets of 5 reps for Ring Hollow + Arch
+672,2025-11-15,Ring Swings,,,3,10,,5,2,46,4,,Completed 3×10 ring swings focusing on rhythm and hollow-arch control
+673,2025-11-15,Ring Transition Drill,,,3,5,,5,2,46,4,,Completed 3×5 transition drills with focus on turnover speed and ring stability
+674,2025-11-15,Seated Behind-the-Neck Press,40.0,kg,4,6,,5,2,46,4,,"4×6 @40kg. Controlled tempo, RPE 7"
+675,2025-11-15,Inverted Ring Rows,,,4,12,,5,2,46,4,,"4×12 strict, full ROM, focus on scapular retraction"
+676,2025-11-15,Conditioning – Aerobic Base (E5MOM 35min),,,7,,,5,2,46,4,,E5MOM × 7 rounds: 10 Alt DB Snatch (22.5kg) + 8 T2B + 10 Burpee Box Jump Over + 8 T2B + 10 Alt DB Snatch (22.5kg). Remaining time BikeErg @70% effort
+677,2025-11-17,Hang Power Snatch + Overhead Squat,40.0,kg,3,1+1+1,,5,3,47,1,,Completed all sets at 40kg
+678,2025-11-17,Knee Pause Snatch + Hang Snatch + Snatch,47.5,kg,6,1+1+1,,5,3,47,1,,"Completed 4 sets at 45kg, 2 sets at 47.5kg"
+679,2025-11-17,Front Squat,92.5,kg,5,3,,5,3,47,1,,Worked up from 85kg to 92.5kg
+680,2025-11-17,B-Stance Deadlift,20.0,kg,3,8+8,7.0,5,3,47,1,,"Performed with 2 dumbbells, increased from 18kg to 20kg"
+681,2025-11-17,Affiliate League 2025 Online Event – Part 1 Row,150.0,cal,,,,5,3,47,1,,"Pair workout – 150 cal row, time 05:07"
+682,2025-11-17,Affiliate League 2025 Online Event – Part 2 Front Squat + Toes to Bar,60.0,kg,,,,5,3,47,1,,"Alternating pairs: 15-12-9-6 reps per athlete, total time 07:35"
+683,2025-11-17,Core Circuit – Landmine Twists + Chinese Back Plank,,,,,,5,3,47,1,,"3 rounds completed – Landmine Twists x20, Chinese Back Plank 40 sec"
+684,2025-11-20,Jerk Balance,40.0,kg,3,3,,5,3,47,2,,"Tempo 020, active recovery – all sets completed at 40kg"
+685,2025-11-20,Split Jerk,85.0,kg,6,2+1,,5,3,47,2,,"3x2 @75kg, 3x1 @78.5-80kg, finished with control focus"
+686,2025-11-20,Spoto Bench Press,55.0,kg,5,5,,5,3,47,2,,Worked up from 50kg to 55kg across 5 sets
+687,2025-11-20,Aerobic Base Conditioning – 5 Rounds For Time,28.98,min,,,,5,3,47,2,,"5 rounds for time: 200m Run, 50m D-Ball Carry (60kg), 200m Run, 10 Burpee Box Jump, 200m Run, 5 Wall Walks. Splits – R1:4:58, R2:5:43, R3:5:45, R4:6:12, R5:6:21"
+688,2025-11-21,Clean Pull + High Hang Clean + Clean,50.0,kg,3,1+1+1,,5,3,47,3,,"Completed 2 sets at 40kg, 1 set at 50kg"
+689,2025-11-21,Clean,75.0,kg,6,"3x3,3x2",,5,3,47,3,,"3x3 @65kg, 3x2 @72.5-75kg"
+690,2025-11-21,Chest-to-Bar Pull-Ups,8.0,kg,5,5,,5,3,47,3,,"Weighted 8kg for sets 2–5, bodyweight for first set"
+691,2025-11-21,Clean Pull + Power Clean,70.0,kg,5,3+2,,5,3,47,3,,Completed all 5 sets at 70kg
+692,2025-11-21,I.W.T – Anaerobic Respiration Conditioning,21.0,reps,5,,,5,3,47,3,,"5x 3min AMRAP / 1.5min rest – 15 cal A.Bike, 12 Box Jump Over (60cm), Max Back Rack Lunges (40kg). Rounds: 21, 21, 21, 17, 18"
+693,2025-11-22,Ring Hollow + Arch,,,3,5,,5,3,47,4,,Completed all 3 sets of 5 reps
+694,2025-11-22,Ring Swings,,,3,10,,5,3,47,4,,Completed all 3 sets of 10 reps
+695,2025-11-22,Ring Transition Drill,,,3,5,,5,3,47,4,,Completed all 3 sets of 5 reps
+696,2025-11-22,Seated Behind-the-Neck Press,45.0,kg,4,6,,5,3,47,4,,40-42.5-45-45kg across 4 sets
+697,2025-11-22,Inverted Ring Rows,,,4,12,,5,3,47,4,,Completed all 4 sets of 12 reps
+698,2025-11-22,Skill / Work Capacity Conditioning – Double Unders + Wall Balls + Bar Muscle-Ups,24.6,min,,,,5,3,47,4,,"5 rounds for time – 25 Double Unders, 12 Wall Balls (9kg), 5-6 Bar Muscle-Ups, 12 Wall Balls (9kg), 25 Double Unders; rest 1.5min between rounds. Rounds: 3:17, 3:18, 3:26, 4:07, 4:28. Total: 24:36"
+699,2025-11-24,Hang Power Snatch + Overhead Squat,40.0,kg,3,1+1+1,,5,4,48,1,,Completed all sets @40kg
+700,2025-11-24,Knee Pause Snatch + Hang Snatch + Snatch,45.0,kg,6,1+1+1,,5,4,48,1,,Completed all sets @45kg
+701,2025-11-24,Front Squat,95.0,kg,1,3,8.0,5,4,48,1,,"Built to 95kg for heavy triple. Previous sets 45, 60, 75kg"
+702,2025-11-24,B-Stance Deadlift,22.5,kg,3,8+8,7.0,5,4,48,1,,Performed with two dumbbells
+703,2025-11-24,AMRAP 9min – Anaerobic Conditioning,5.0,rounds,1,,9.0,5,4,48,1,,"10 cal Assault Bike, 8 Box Jump Over, 10 Back Rack Lunges (45kg). Round times: 1:40, 1:55, 1:50, 1:54, 1:56"
+704,2025-11-24,Core Superset – Landmine Twist + Chinese Back Plank,,,3,,,5,4,48,1,,"3 Rounds: Landmine Twists ×20, Chinese Back Plank ×40sec"
+705,2025-11-25,Jerk Balance,40.0,kg,3,3,,5,4,48,2,,"Tempo 020, active recovery"
+706,2025-11-25,Split Jerk,80.0,kg,9,1,9.0,5,4,48,2,,Built up to 80kg; failed attempt at 85kg
+707,2025-11-25,Spoto Bench Press,57.5,kg,5,5,8.0,5,4,48,2,,"Completed 5x5, top set @57.5kg"
+708,2025-11-25,Chest-to-Bar Pull-Up,8.0,kg,4,5,8.0,5,4,48,2,,Weighted sets at 8kg; first set bodyweight
+709,2025-11-25,E4MOM Conditioning – Run + TTB + Hang Power Snatch + Burpee Box Jump,,,8,,,5,4,48,2,,"A) 600–800m Run; B) 15 Toes-to-Bar, 12 Hang Power Snatch (40kg), 9 Burpee Box Jumps"
+710,2025-11-27,Clean Pull + High Hang Clean + Clean,50.0,kg,3,1+1+1,,5,4,48,3,,"Completed 3 sets: 40, 40, 50 kg"
+711,2025-11-27,Clean,75.0,kg,6,3x3+3x2,,5,4,48,3,,"3×3 @65–70 kg, 3×2 @75 kg"
+712,2025-11-27,Clean Pull + Power Clean,75.0,kg,5,3+2,,5,4,48,3,,"Completed 5 sets: 75, 70, 70, 70, 70 kg"
+713,2025-11-28,Affiliate 2025 - Relay 1600m (4×400m),65.0,sec,1,400m,,5,4,48,4,,Athlete 1 split: 01:05 for 400m
+714,2025-11-28,Affiliate 2025 - Partner Grinder,35.95,min,1,,,5,4,48,4,,"8 Rounds for Time (400m Run together, 20 Synchro Alt. DB Snatch 22.5/15kg, 30 Pull-Ups split). Partner rotation per round. P1 role. Finished in 35:57."
+715,2025-11-28,Affiliate 2025 - Heavy Bench,70.0,kg,1,3,,5,4,48,4,,Performed 3 reps at 70 kg for 3RM attempt
+716,2025-11-29,Ring Hollow + Arch,,,3,5,,5,4,48,5,,Completed 3 sets of 5
+717,2025-11-29,Ring Swings,,,3,10,,5,4,48,5,,3×10 ring swings
+718,2025-11-29,Ring Transition Drill,,,3,5,,5,4,48,5,,3×5 transition drills
+719,2025-11-29,Seated Behind-the-Neck Press,45.0,kg,4,6,,5,4,48,5,,Completed sets at 40–45 kg
+720,2025-11-29,Inverted Ring Rows,,,4,12,,5,4,48,5,,4×12 reps completed
+721,2025-11-29,Skill / Work Capacity EMOM,,,15,,,5,4,48,5,,"EMOM 15min: A) 40-50 Double Unders, B) 4-5 Wall Walks, C) 16-20 Wall Ball Shots (9kg)"
+37,2025-W28-6,Handstand to Wall,20.0,sec,3,Hold,,1,2,28,4,7,—
+38,2025-W28-6,ABMAT Eccentric HSPU (Strict),,reps,5,5,,1,2,28,4,7,—
+39,2025-W28-6,Weighted Pull-Ups,10.0,kg,4,5,,1,2,28,4,7,—
+40,2025-W28-6,Bench Press,60.0,kg,5,5,8.0,1,2,28,4,7,—
+41,2025-W28-6,Pendlay Rows,60.0,kg,4,8,8.0,1,2,28,4,7,—
+42,2025-W28-6,Handstand to Wall,20.0,sec,3,Hold,,1,2,28,4,7,
+43,2025-W28-6,ABMAT Eccentric HSPU (Strict),,,5,5,,1,2,28,4,7,
+44,2025-W28-6,Weighted Pull-Ups,10.0,kg,4,5,,1,2,28,4,7,
+45,2025-W28-6,Bench Press,60.0,kg,5,5,8.0,1,2,28,4,7,
+46,2025-W28-6,Pendlay Rows,60.0,kg,4,8,8.0,1,2,28,4,7,
+47,2025-W28-6,Classic Metcon (For Time),,,1,1,,1,2,28,4,7,"13:45 time | 30 Cal Assault Bike, 9 Wall Walks, 21 Deadlifts @ 80kg, 20 Cal Assault Bike, 7 Wall Walks, 15 Deadlifts @ 80kg, 10 Cal Assault Bike, 5 Wall Walks, 9 Deadlifts @ 80kg"
+101,2025-W31-1,Snatch Balance,40.0,kg,5,3,,1,1,31,1,,Cycle 1.5 | Day 1 | RFA TEMP
+102,2025-W31-1,Power Snatch + Hang Snatch + Overhead Squat,47.5,kg,6,1+1+1,,1,1,31,1,,"Cycle 1.5 | Day 1 | RFA TEMP | 1 set @ 40kg, 3 sets @ 45kg, 2 sets @ 47.5kg"
+103,2025-W31-1,Back Squat,100.0,kg,6,"5,5,3,3,1,1",,1,1,31,1,,Cycle 1.5 | Day 1 | RFA TEMP | 75/75/85/90/100/100kg
+104,2025-W31-1,Good Morning,40.0,kg,3,10,,1,1,31,1,,Cycle 1.5 | Day 1 | RFA TEMP | RPE 6
+105,2025-W31-1,Assault Bike Sprint Intervals,2576.4,m,8,0:20,,1,1,31,1,,Cycle 1.5 | Day 1 | RFA TEMP | E2MOM x8. 103.9 cal
+106,2025-W31-1,Core Circuit (Tuck Hold + Farmer Carry),,,3,2 movements,,1,1,31,1,,Cycle 1.5 | Day 1 | RFA TEMP | Hanging Tuck Hold – 20s; Farmer Carry – 30m x2 @32kg
+107,2025-W31-2,Behind The Neck Jerk,40.0,kg,3,3,,1,1,31,2,,Cycle 1.5 | Day 2 | RFA TEMP
+108,2025-W31-2,Jerk Dip + Jerk Pause + Jerk Complex,60.0,kg,6,1+1+1,,1,1,31,2,,"Cycle 1.5 | Day 2 | RFA TEMP | 1x50kg, 3x55kg, 2x60kg"
+109,2025-W31-2,Overhead Press,60.0,kg,6,"5,5,3,3,1,1",,1,1,31,2,,"Cycle 1.5 | Day 2 | RFA TEMP | 2x5 (40/45kg), 2x3 (50/55kg), 2x1 (60kg)"
+110,2025-W31-2,Weighted Pull-Up,16.0,kg,4,"5,5,3,3",,1,1,31,2,,"Cycle 1.5 | Day 2 | RFA TEMP | 2x5 @10kg, 1x3 @12kg, 1x3 @16kg"
+111,2025-W31-2,AMRAP 35 min,,,1,7 Rounds,,1,1,31,2,,"Cycle 1.5 | Day 2 | RFA TEMP | 400m BikeErg, 20 KBS (24kg), 15 BJO, 5 Wall Walks"
+126,2025-W31-4,High Hang Clean (Squat),40.0,kg,3,3,,1,1,31,3,,Cycle 1.5 | Day 3 | RFA cycle
+127,2025-W31-4,Knee Pause Power Clean + Clean,65.0,kg,3,1+2,,1,1,31,3,,Cycle 1.5 | Day 3 | RFA cycle | 3 sets @65kg
+128,2025-W31-4,Knee Pause Power Clean + Clean,70.0,kg,3,1+2,,1,1,31,3,,Cycle 1.5 | Day 3 | RFA cycle | 3 sets @70kg
+129,2025-W31-4,Deadlift,140.0,kg,6,"5,5,3,3,1,1",,1,1,31,3,,"Cycle 1.5 | Day 3 | RFA cycle | 2×5 @110kg, 1×3 @120kg, 1×3 @130kg, 2×1 @140kg"
+130,2025-W31-4,Classic Metcon (For Time),,,1,1,,1,1,31,3,,"Cycle 1.5 | Day 3 | RFA cycle | Event 1: Team of 4 – 150 Wall Balls (12kg), I did 50. EMOM: 5 synchronized burpees. Event 2 (Pairs): 5 Rounds IGUG – 20 DU (Heavy), 6 DB Thrusters, 4m HS Walk, 2 Rope Climbs (No Legs)"
+131,2025-W31-5,Handstand to Wall,20.0,seconds,3,20s hold,,1,1,31,4,13,Cycle 1.5 | Day 4 | RFA cycle | Gymnastics Hold
+132,2025-W31-5,ABMAT Eccentric Strict HSPU,,,5,5,,1,1,31,4,13,Cycle 1.5 | Day 4 | RFA cycle | Tempo 300
+133,2025-W31-5,Bench Press,67.5,kg,5,5,,1,1,31,4,13,"Cycle 1.5 | Day 4 | RFA cycle | 3x5 @ 65kg, 2x5 @ 67.5kg"
+134,2025-W31-5,Pendlay Rows,70.0,kg,4,8,,1,1,31,4,13,"Cycle 1.5 | Day 4 | RFA cycle | 3 sets @ 65kg, 1 top set @ 70kg"
+135,2025-W31-5,Conditioning – E3MOM,,,5,1,,1,1,31,4,13,"Cycle 1.5 | Day 4 | RFA cycle | 5 Rounds – every 3 minutes: 12 cal row, 15 wall balls @ 9kg, 12 toes to bar"
+176,2025-W33-1,Snatch Balance,40.0,kg,5,3,,2,1,33,1,12,Completed as planned
+177,2025-W33-1,Power Snatch + Hang Snatch + Overhead Squat,45.0,kg,5,1+1+1,,2,1,33,1,12,"1 set at 40 kg, 5 sets at 45 kg"
+178,2025-W33-1,Back Squat,85.0,kg,5,5,8.0,2,1,33,1,12,"2×5 @ 80 kg, 2×5 @ 82.5 kg, 1×5 @ 85 kg"
+179,2025-W33-1,Good Morning,45.0,kg,3,10,6.0,2,1,33,1,12,"1×10 @ 40 kg, 2×10 @ 45 kg"
+180,2025-W33-1,Row Intervals,,,7,,,2,1,33,1,12,"Anaerobic EMOM – 30 Cal Row @ 80–85%. R1: 1:34 (2:01 pace), R2: 1:30 (1:59 pace), R3: 1:32 (1:56 pace), R4: 1:30 (1:57 pace), R5: 1:29 (1:55 pace), R6: 1:35 (2:00 pace), R7: 1:36 (2:03 pace)"
+181,2025-W33-1,Core Work,,,3,,,2,1,33,1,12,"3 Rounds: Hanging Tuck Hold 20 sec, Single Arm Farmer Carry – 30m x2 (32 kg)"
+182,2025-W33-2,Behind the Neck Jerk,45.0,kg,3,3,,2,1,33,2,12,40 kg / 45 kg / 45 kg
+183,2025-W33-2,Jerk Dip + Jerk Pause + Jerk,65.0,kg,6,1+1+1,,2,1,33,2,12,50 kg / 55 kg / 60 kg / 60 kg / 60 kg / 65 kg
+184,2025-W33-2,Overhead Press,50.0,kg,5,5,,2,1,33,2,12,45 kg / 45 kg / 47.5 kg / 47.5 kg / 50 kg
+185,2025-W33-2,Chest-to-Bar Pull-Ups,,,5,5,,2,1,33,2,12,"Bodyweight, RPE 7–8"
+186,2025-W33-2,Aerobic Base Conditioning,,,5,,,2,1,33,2,12,"AMRAP 35 min – completed 5 rounds. R1: 06:30, R2: 06:40, R3: 06:57, R4: 07:53, R5: 07:27"
+187,2025-W34-1,Snatch Balance,40.0,kg,5,3,,2,2,34,1,13,Completed 5×3 @ 40 kg
+188,2025-W34-1,Power Snatch + Hang Snatch + Overhead Squat,45.0,kg,5,1+1+1,,2,2,34,1,13,"1 set at 40 kg, 5 sets at 45 kg"
+189,2025-W34-1,Back Squat,85.0,kg,5,5,,2,2,34,1,13,"2×5 @ 80 kg, 2×5 @ 82.5 kg, 1×5 @ 85 kg"
+190,2025-W34-1,Good Morning,45.0,kg,3,10,6.0,2,2,34,1,13,"1×10 @ 40 kg, 2×10 @ 45 kg"
+191,2025-W34-1,Row Intervals,,,6,,,2,2,34,1,13,"E4MOM ×6 – 45 Cal Row @ 80–85% effort. Splits: 1:53.3 | 1:42.8/500m | 1408 Cal/hr; 2:07.8 | 1:48.4/500m | 1243 Cal/hr; 2:16.9 | 1:51.6/500m | 1165 Cal/hr; 2:11.9 | 1:49.7/500m | 1211 Cal/hr; 2:18.7 | 1:53.2/500m | 1148 Cal/hr; 2:11.9 | 1:49.7/500m | 1211 Cal/hr. Total distance 3568m, Avg pace 1:49.2/500m, HR avg 146, SR 32 spm"
+192,2025-W34-1,Core Work,,,3,,,2,2,34,1,13,"3 rounds – Hanging Tuck Hold (20s), Single Arm Farmer Carry – 30m ×2 (32 kg)"
+193,2025-W34-2,Behind the Neck Jerk,40.0,kg,3,3,,2,2,34,2,13,3×3 – 40 kg / 40 kg / 40 kg
+194,2025-W34-2,Jerk Dip + Jerk Pause + Jerk,70.0,kg,6,1+1+1,,2,2,34,2,13,60 / 65 / 65 / 65 / 67.5 / 70 kg
+195,2025-W34-2,Overhead Press,52.5,kg,5,5,,2,2,34,2,13,45 / 47.5 / 50 / 50 / 52.5 kg
+196,2025-W34-2,Chest-to-Bar Pull-Ups,,,5,5,,2,2,34,2,13,"Bodyweight, RPE 7–8"
+197,2025-W34-3,High Hang Clean (Squat),40.0,kg,3,3,,2,2,34,3,13,3×3 – 40 kg across
+198,2025-W34-3,Knee Pause Power Clean + Clean,75.0,kg,6,1+2,,2,2,34,3,13,Sets: 70 / 70 / 70 / 70 / 75 / 75 kg
+199,2025-W34-3,Deadlift,130.0,kg,5,5,,2,2,34,3,13,Sets: 120 / 120 / 125 / 130 / 130 kg
+

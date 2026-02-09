@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+sqlmodel
+pydantic
+python-dotenv
+pandas
+psycopg2-binary
+pg8000
