@@ -221,6 +221,17 @@ async def test_bulk_duplicate_detection(client):
     assert r.status_code == 409
 
 
+@pytest.mark.asyncio
+async def test_no_false_duplicate_without_set_number(client):
+    """When set_number is omitted, multiple sets should be allowed (no dup block)."""
+    w = {**VALID_WORKOUT}
+    del w["set_number"]
+    r1 = await client.post("/workouts", json=w)
+    assert r1.status_code == 200
+    r2 = await client.post("/workouts", json=w)
+    assert r2.status_code == 200  # should NOT be 409
+
+
 # ─── Search ──────────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio

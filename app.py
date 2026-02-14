@@ -399,10 +399,10 @@ def _escape_like(s: str) -> str:
 
 
 def _safe_like(column, term: str):
-    """Build a safe case-insensitive LIKE expression."""
+    """Build a safe case-insensitive LIKE expression with proper escaping."""
     escaped = _escape_like(term.strip().lower())
     pattern = f"%{escaped}%"
-    return func.lower(column).like(pattern)
+    return func.lower(column).like(pattern, escape="\\")
 
 
 def _row_to_out(w: Workout) -> WorkoutOut:
@@ -437,13 +437,19 @@ def _db_type() -> str:
 async def _check_duplicates(
     session: AsyncSession, w: WorkoutIn
 ) -> List[int]:
-    """Return IDs of existing rows that match date+exercise+set_number+cycle+week+day."""
+    """Return IDs of existing rows that match date+exercise+set_number+cycle+week+day.
+
+    Requires set_number to be present for the check to run. Without it, the query
+    would be too broad (date+exercise only) and block multi-set logging for clients
+    that don't send set_number.
+    """
+    if w.set_number is None:
+        return []  # Can't reliably detect duplicates without set_number
     stmt = select(Workout.id).where(
         Workout.date == w.date,
         func.lower(Workout.exercise) == w.exercise.lower(),
+        Workout.set_number == w.set_number,
     )
-    if w.set_number is not None:
-        stmt = stmt.where(Workout.set_number == w.set_number)
     if w.cycle is not None:
         stmt = stmt.where(Workout.cycle == w.cycle)
     if w.week is not None:
