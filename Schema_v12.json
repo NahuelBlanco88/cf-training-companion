@@ -1,0 +1,1126 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CF-Log API",
+    "description": "CrossFit Training Log & Analytics API v12. Strength sets + metcon/benchmark tracking. RPE removed. One row per working set for strength; one row per metcon result for conditioning.",
+    "version": "12.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://cf-training-companion-91594070242.us-central1.run.app"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Health check — confirms API and DB are running",
+        "responses": {
+          "200": {
+            "description": "Health status",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HealthOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/debug/dbinfo": {
+      "get": {
+        "operationId": "dbinfo",
+        "summary": "Database info — type, workout row count, metcon row count",
+        "responses": {
+          "200": {
+            "description": "DB info",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/DBInfoOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/debug/exercises": {
+      "get": {
+        "operationId": "debugExercises",
+        "summary": "Top exercises by count",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 50, "minimum": 1, "maximum": 500 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exercise list with counts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ExerciseCountOut" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workouts": {
+      "post": {
+        "operationId": "addWorkout",
+        "summary": "Log a single working set",
+        "parameters": [
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "description": "Skip duplicate check",
+            "schema": { "type": "boolean", "default": false }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WorkoutIn" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Workout saved",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GenericResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Duplicate detected — use force=true to override"
+          },
+          "422": {
+            "description": "Validation error (bad date, empty exercise)"
+          }
+        }
+      },
+      "get": {
+        "operationId": "queryWorkouts",
+        "summary": "Query workouts with optional filters",
+        "parameters": [
+          { "name": "exercise", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "cycle", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "week", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "iso_week", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "day", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "start", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
+          { "name": "end", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
+          { "name": "tag", "in": "query", "required": false, "description": "Filter by tag", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of workouts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/WorkoutOut" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workouts/bulk": {
+      "post": {
+        "operationId": "addWorkoutsBulk",
+        "summary": "Log multiple sets in one call (preferred method)",
+        "parameters": [
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "description": "Skip duplicate check",
+            "schema": { "type": "boolean", "default": false }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BulkWorkoutIn" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk save result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BulkWorkoutOut" }
+              }
+            }
+          },
+          "409": {
+            "description": "Duplicates detected — use force=true to override"
+          }
+        }
+      }
+    },
+    "/workouts/search": {
+      "get": {
+        "operationId": "searchWorkouts",
+        "summary": "Fuzzy search workouts by exercise name",
+        "parameters": [
+          { "name": "q", "in": "query", "required": true, "description": "Exercise name or part of it", "schema": { "type": "string", "minLength": 1 } },
+          { "name": "cycle", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0 } },
+          { "name": "week", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0 } },
+          { "name": "day", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0 } },
+          { "name": "iso_week", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0 } },
+          { "name": "start", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
+          { "name": "end", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
+          { "name": "tag", "in": "query", "required": false, "description": "Filter by tag", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching workouts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/WorkoutOut" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workouts/by_cwd": {
+      "get": {
+        "operationId": "workoutsByCWD",
+        "summary": "Get workouts by Cycle/Week/Day (used for verification)",
+        "parameters": [
+          { "name": "cycle", "in": "query", "required": true, "schema": { "type": "integer", "minimum": 0 } },
+          { "name": "week", "in": "query", "required": true, "schema": { "type": "integer", "minimum": 0 } },
+          { "name": "day", "in": "query", "required": true, "schema": { "type": "integer", "minimum": 0 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Workouts for that cycle/week/day",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/WorkoutOut" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workouts/last": {
+      "get": {
+        "operationId": "lastWorkout",
+        "summary": "Most recent workout for an exercise",
+        "parameters": [
+          { "name": "exercise", "in": "query", "required": true, "schema": { "type": "string", "minLength": 1 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Last workout",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WorkoutOut" }
+              }
+            }
+          },
+          "404": { "description": "No workout found" }
+        }
+      }
+    },
+    "/workouts/verify": {
+      "get": {
+        "operationId": "verifyWorkouts",
+        "summary": "Verify logged workouts — GPT calls this after every save to confirm data",
+        "parameters": [
+          { "name": "date", "in": "query", "required": true, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
+          { "name": "exercise", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "expected_sets", "in": "query", "required": false, "description": "How many sets were expected", "schema": { "type": "integer", "minimum": 1 } },
+          { "name": "cycle", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0 } },
+          { "name": "week", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0 } },
+          { "name": "day", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Verification result with match status and logged data",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/VerifyOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workouts/undo_last": {
+      "delete": {
+        "operationId": "undoLast",
+        "summary": "Delete the N most recently added rows (undo a bulk insert)",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "required": true,
+            "description": "Number of most recent rows to delete",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Undo result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UndoOut" }
+              }
+            }
+          },
+          "404": { "description": "No workouts to undo" }
+        }
+      }
+    },
+    "/workouts/{workout_id}": {
+      "put": {
+        "operationId": "editWorkout",
+        "summary": "Edit an existing workout",
+        "parameters": [
+          { "name": "workout_id", "in": "path", "required": true, "schema": { "type": "integer", "minimum": 1 } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WorkoutIn" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated workout",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WorkoutOut" }
+              }
+            }
+          },
+          "404": { "description": "Workout not found" }
+        }
+      },
+      "delete": {
+        "operationId": "deleteWorkout",
+        "summary": "Delete a specific workout by ID",
+        "parameters": [
+          { "name": "workout_id", "in": "path", "required": true, "schema": { "type": "integer", "minimum": 1 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GenericResponse" }
+              }
+            }
+          },
+          "404": { "description": "Workout not found" }
+        }
+      }
+    },
+    "/metcons": {
+      "post": {
+        "operationId": "addMetcon",
+        "summary": "Log a conditioning workout / benchmark result",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MetconIn" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Metcon saved",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GenericResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error (bad date, invalid workout_type, invalid rx)"
+          }
+        }
+      },
+      "get": {
+        "operationId": "queryMetcons",
+        "summary": "Query metcons with optional filters",
+        "parameters": [
+          { "name": "name", "in": "query", "required": false, "description": "Metcon name (partial match)", "schema": { "type": "string" } },
+          { "name": "workout_type", "in": "query", "required": false, "description": "for_time, amrap, emom, chipper, interval, other", "schema": { "type": "string" } },
+          { "name": "rx", "in": "query", "required": false, "description": "rx, scaled, rx_plus", "schema": { "type": "string" } },
+          { "name": "cycle", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "week", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "day", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "start", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
+          { "name": "end", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
+          { "name": "tag", "in": "query", "required": false, "description": "Filter by tag", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of metcons",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/MetconOut" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metcons/bulk": {
+      "post": {
+        "operationId": "addMetconsBulk",
+        "summary": "Log multiple metcon results in one call",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BulkMetconIn" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk save result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BulkMetconOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metcons/search": {
+      "get": {
+        "operationId": "searchMetcons",
+        "summary": "Search metcons by name with optional filters",
+        "parameters": [
+          { "name": "q", "in": "query", "required": true, "description": "Metcon name or part of it", "schema": { "type": "string", "minLength": 1 } },
+          { "name": "workout_type", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "rx", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "start", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
+          { "name": "end", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
+          { "name": "tag", "in": "query", "required": false, "description": "Filter by tag", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching metcons",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/MetconOut" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metcons/last": {
+      "get": {
+        "operationId": "lastMetcon",
+        "summary": "Most recent result for a named metcon",
+        "parameters": [
+          { "name": "name", "in": "query", "required": true, "schema": { "type": "string", "minLength": 1 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Last metcon result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MetconOut" }
+              }
+            }
+          },
+          "404": { "description": "No metcon found with that name" }
+        }
+      }
+    },
+    "/metcons/{metcon_id}": {
+      "put": {
+        "operationId": "editMetcon",
+        "summary": "Edit an existing metcon result",
+        "parameters": [
+          { "name": "metcon_id", "in": "path", "required": true, "schema": { "type": "integer", "minimum": 1 } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MetconIn" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated metcon",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MetconOut" }
+              }
+            }
+          },
+          "404": { "description": "Metcon not found" }
+        }
+      },
+      "delete": {
+        "operationId": "deleteMetcon",
+        "summary": "Delete a metcon result by ID",
+        "parameters": [
+          { "name": "metcon_id", "in": "path", "required": true, "schema": { "type": "integer", "minimum": 1 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GenericResponse" }
+              }
+            }
+          },
+          "404": { "description": "Metcon not found" }
+        }
+      }
+    },
+    "/analytics/metcon_prs": {
+      "get": {
+        "operationId": "metconPRs",
+        "summary": "Best scores for benchmarks. For timed = fastest, for AMRAP = most rounds+reps",
+        "parameters": [
+          { "name": "name", "in": "query", "required": false, "description": "Filter by metcon name (partial match)", "schema": { "type": "string" } },
+          { "name": "rx", "in": "query", "required": false, "description": "Filter by rx status", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Benchmark PRs",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BenchmarkListOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/metcon_timeline": {
+      "get": {
+        "operationId": "metconTimeline",
+        "summary": "History of a named metcon over time — track benchmark progress",
+        "parameters": [
+          { "name": "name", "in": "query", "required": true, "description": "Metcon name", "schema": { "type": "string", "minLength": 1 } },
+          { "name": "rx", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "start", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
+          { "name": "end", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Metcon timeline data",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MetconTimelineOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats": {
+      "get": {
+        "operationId": "stats",
+        "summary": "Overall stats: total sessions, total metcons, bests per exercise, last workout",
+        "responses": {
+          "200": {
+            "description": "Stats",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StatsOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/prs": {
+      "get": {
+        "operationId": "analyticsPRs",
+        "summary": "Personal records (highest value per exercise)",
+        "parameters": [
+          { "name": "exercise", "in": "query", "required": false, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "PRs",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PRsOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/weekly_summary": {
+      "get": {
+        "operationId": "analyticsWeeklySummary",
+        "summary": "Sets per day for a given cycle/week",
+        "parameters": [
+          { "name": "cycle", "in": "query", "required": true, "schema": { "type": "integer" } },
+          { "name": "week", "in": "query", "required": false, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Weekly summary",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WeeklySummaryOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/progress_compare": {
+      "get": {
+        "operationId": "analyticsProgressCompare",
+        "summary": "Compare set count for an exercise between two weeks",
+        "parameters": [
+          { "name": "exercise", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "cycle", "in": "query", "required": true, "schema": { "type": "integer" } },
+          { "name": "week1", "in": "query", "required": true, "schema": { "type": "integer" } },
+          { "name": "week2", "in": "query", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Comparison result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProgressCompareOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/repmax": {
+      "get": {
+        "operationId": "analyticsRepmax",
+        "summary": "Best value for an exercise (auto-detects time vs weight)",
+        "parameters": [
+          { "name": "exercise", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "mode", "in": "query", "required": false, "description": "max, min, or auto", "schema": { "type": "string", "default": "max", "enum": ["max", "min", "auto"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rep max result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RepmaxOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/consistency": {
+      "get": {
+        "operationId": "analyticsConsistency",
+        "summary": "Weeks with 100% completion (days 1-4 all logged)",
+        "parameters": [
+          { "name": "cycle", "in": "query", "required": false, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consistency result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ConsistencyOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/estimated_1rm": {
+      "get": {
+        "operationId": "analyticsEstimated1RM",
+        "summary": "Estimate 1RM from logged sets using Epley or Brzycki formula",
+        "parameters": [
+          { "name": "exercise", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "formula", "in": "query", "required": false, "description": "epley or brzycki", "schema": { "type": "string", "default": "epley", "enum": ["epley", "brzycki"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estimated 1RM",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OneRMOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/volume": {
+      "get": {
+        "operationId": "analyticsVolume",
+        "summary": "Volume per exercise (sets x reps x weight) for a cycle/week or date range",
+        "parameters": [
+          { "name": "cycle", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "week", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "start", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
+          { "name": "end", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Volume breakdown",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WeeklyVolumeOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/timeline": {
+      "get": {
+        "operationId": "analyticsTimeline",
+        "summary": "Exercise history timeline — best value per date, for charting progress",
+        "parameters": [
+          { "name": "exercise", "in": "query", "required": true, "schema": { "type": "string", "minLength": 1 } },
+          { "name": "start", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
+          { "name": "end", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Timeline data",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ExerciseTimelineOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search_exercise": {
+      "get": {
+        "operationId": "searchExercise",
+        "summary": "Search logged workouts by exercise name with filters",
+        "parameters": [
+          { "name": "exercise", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "cycle", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "week", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "iso_week", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "day", "in": "query", "required": false, "schema": { "type": "integer" } },
+          { "name": "tag", "in": "query", "required": false, "description": "Filter by tag", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SearchExerciseOut" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/export/csv": {
+      "get": {
+        "operationId": "exportCsv",
+        "summary": "Export all workout data as CSV",
+        "responses": {
+          "200": {
+            "description": "CSV export",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CsvExportOut" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthOut": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean" },
+          "db_connected": { "type": "boolean" },
+          "db_type": { "type": "string" },
+          "timestamp": { "type": "string" }
+        },
+        "required": ["ok", "db_connected", "db_type", "timestamp"]
+      },
+      "GenericResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" }
+        },
+        "required": ["message"]
+      },
+      "DBInfoOut": {
+        "type": "object",
+        "properties": {
+          "db_type": { "type": "string" },
+          "workout_rows": { "type": "integer" },
+          "metcon_rows": { "type": "integer" }
+        },
+        "required": ["db_type", "workout_rows", "metcon_rows"]
+      },
+      "ExerciseCountOut": {
+        "type": "object",
+        "properties": {
+          "exercise": { "type": "string" },
+          "count": { "type": "integer" }
+        },
+        "required": ["exercise", "count"]
+      },
+      "WorkoutIn": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string", "description": "YYYY-MM-DD format, must be a valid calendar date" },
+          "exercise": { "type": "string", "description": "Exercise name in Title Case (auto-normalized)" },
+          "set_number": { "type": "integer", "description": "Which working set (1, 2, 3...)" },
+          "reps": { "type": "integer", "description": "Exact rep count this set" },
+          "value": { "type": "number", "description": "Weight in kg, time in sec, or calories" },
+          "unit": { "type": "string", "description": "kg, sec, cal, m, min" },
+          "cycle": { "type": "integer", "description": "Training cycle number" },
+          "week": { "type": "integer", "description": "Week within cycle" },
+          "iso_week": { "type": "integer", "description": "ISO calendar week number" },
+          "day": { "type": "integer", "description": "Training day number (1-7)" },
+          "notes": { "type": "string", "default": "" },
+          "tags": { "type": "string", "description": "Comma-separated tags (e.g. 'pr attempt,deload'). Auto-normalized to lowercase." }
+        },
+        "required": ["date", "exercise"]
+      },
+      "WorkoutOut": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "date": { "type": "string" },
+          "exercise": { "type": "string" },
+          "set_number": { "type": "integer" },
+          "reps": { "type": "integer" },
+          "value": { "type": "number" },
+          "unit": { "type": "string" },
+          "cycle": { "type": "integer" },
+          "week": { "type": "integer" },
+          "iso_week": { "type": "integer" },
+          "day": { "type": "integer" },
+          "notes": { "type": "string" },
+          "tags": { "type": "string" }
+        },
+        "required": ["id", "date", "exercise"]
+      },
+      "BulkWorkoutIn": {
+        "type": "object",
+        "properties": {
+          "workouts": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/WorkoutIn" }
+          }
+        },
+        "required": ["workouts"]
+      },
+      "BulkWorkoutOut": {
+        "type": "object",
+        "properties": {
+          "saved": { "type": "integer" },
+          "ids": { "type": "array", "items": { "type": "integer" } }
+        },
+        "required": ["saved", "ids"]
+      },
+      "MetconIn": {
+        "type": "object",
+        "description": "A conditioning/benchmark workout result",
+        "properties": {
+          "date": { "type": "string", "description": "YYYY-MM-DD format" },
+          "name": { "type": "string", "description": "Metcon name in Title Case (auto-normalized). E.g. 'Fran', 'Murph', 'Tuesday Conditioning'" },
+          "workout_type": { "type": "string", "description": "Type of workout", "enum": ["for_time", "amrap", "emom", "chipper", "interval", "other"] },
+          "description": { "type": "string", "description": "The prescription, e.g. '21-15-9 Thrusters & Pull-ups'" },
+          "score_time_seconds": { "type": "integer", "description": "Total time in seconds (for timed WODs like for_time)" },
+          "score_rounds": { "type": "integer", "description": "Completed rounds (for AMRAP)" },
+          "score_reps": { "type": "integer", "description": "Extra reps beyond last full round (for AMRAP)" },
+          "score_display": { "type": "string", "description": "Human-readable score: '3:45', '12+8', '185 reps'" },
+          "rx": { "type": "string", "description": "Prescription level", "enum": ["rx", "scaled", "rx_plus"] },
+          "time_cap_seconds": { "type": "integer", "description": "Time cap in seconds" },
+          "cycle": { "type": "integer", "description": "Training cycle number" },
+          "week": { "type": "integer", "description": "Week within cycle" },
+          "iso_week": { "type": "integer", "description": "ISO calendar week number" },
+          "day": { "type": "integer", "description": "Training day number" },
+          "notes": { "type": "string", "default": "" },
+          "tags": { "type": "string", "description": "Comma-separated tags. Auto-normalized to lowercase." }
+        },
+        "required": ["date", "name", "workout_type"]
+      },
+      "MetconOut": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "date": { "type": "string" },
+          "name": { "type": "string" },
+          "workout_type": { "type": "string" },
+          "description": { "type": "string" },
+          "score_time_seconds": { "type": "integer" },
+          "score_rounds": { "type": "integer" },
+          "score_reps": { "type": "integer" },
+          "score_display": { "type": "string" },
+          "rx": { "type": "string" },
+          "time_cap_seconds": { "type": "integer" },
+          "cycle": { "type": "integer" },
+          "week": { "type": "integer" },
+          "iso_week": { "type": "integer" },
+          "day": { "type": "integer" },
+          "notes": { "type": "string" },
+          "tags": { "type": "string" }
+        },
+        "required": ["id", "date", "name", "workout_type"]
+      },
+      "BulkMetconIn": {
+        "type": "object",
+        "properties": {
+          "metcons": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/MetconIn" }
+          }
+        },
+        "required": ["metcons"]
+      },
+      "BulkMetconOut": {
+        "type": "object",
+        "properties": {
+          "saved": { "type": "integer" },
+          "ids": { "type": "array", "items": { "type": "integer" } }
+        },
+        "required": ["saved", "ids"]
+      },
+      "MetconPROut": {
+        "type": "object",
+        "description": "Best score for a named benchmark",
+        "properties": {
+          "name": { "type": "string" },
+          "workout_type": { "type": "string" },
+          "best_time_seconds": { "type": "integer", "description": "Fastest time (for timed WODs)" },
+          "best_time_display": { "type": "string", "description": "Human-readable fastest time" },
+          "best_rounds": { "type": "integer", "description": "Best rounds (for AMRAP)" },
+          "best_reps": { "type": "integer", "description": "Extra reps in best AMRAP" },
+          "best_score_display": { "type": "string" },
+          "rx": { "type": "string" },
+          "date": { "type": "string" },
+          "metcon_id": { "type": "integer" }
+        },
+        "required": ["name", "workout_type"]
+      },
+      "MetconTimelinePointOut": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string" },
+          "score_time_seconds": { "type": "integer" },
+          "score_rounds": { "type": "integer" },
+          "score_reps": { "type": "integer" },
+          "score_display": { "type": "string" },
+          "rx": { "type": "string" }
+        },
+        "required": ["date"]
+      },
+      "MetconTimelineOut": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "workout_type": { "type": "string" },
+          "timeline": { "type": "array", "items": { "$ref": "#/components/schemas/MetconTimelinePointOut" } }
+        },
+        "required": ["name", "timeline"]
+      },
+      "BenchmarkListOut": {
+        "type": "object",
+        "properties": {
+          "benchmarks": { "type": "array", "items": { "$ref": "#/components/schemas/MetconPROut" } }
+        },
+        "required": ["benchmarks"]
+      },
+      "StatsOut": {
+        "type": "object",
+        "properties": {
+          "total_sessions": { "type": "integer" },
+          "total_metcons": { "type": "integer" },
+          "bests": { "type": "object", "additionalProperties": { "type": "number" } },
+          "last": { "$ref": "#/components/schemas/WorkoutOut" }
+        },
+        "required": ["total_sessions", "total_metcons", "bests"]
+      },
+      "PRsOut": {
+        "type": "object",
+        "properties": {
+          "prs": { "type": "object", "additionalProperties": { "type": "number" } }
+        },
+        "required": ["prs"]
+      },
+      "WeeklySummaryOut": {
+        "type": "object",
+        "properties": {
+          "cycle": { "type": "integer" },
+          "week": { "type": "integer" },
+          "days_logged": { "type": "object", "additionalProperties": { "type": "integer" } },
+          "total_sets": { "type": "integer" }
+        },
+        "required": ["cycle", "days_logged", "total_sets"]
+      },
+      "ProgressCompareOut": {
+        "type": "object",
+        "properties": {
+          "exercise": { "type": "string" },
+          "cycle": { "type": "integer" },
+          "week1": { "type": "integer" },
+          "week2": { "type": "integer" },
+          "week1_sets": { "type": "integer" },
+          "week2_sets": { "type": "integer" },
+          "delta": { "type": "integer" }
+        },
+        "required": ["exercise", "cycle", "week1", "week2", "week1_sets", "week2_sets", "delta"]
+      },
+      "RepmaxOut": {
+        "type": "object",
+        "properties": {
+          "exercise": { "type": "string" },
+          "best_value": { "type": "number" },
+          "unit": { "type": "string" },
+          "workout_id": { "type": "integer" }
+        },
+        "required": ["exercise"]
+      },
+      "ConsistencyOut": {
+        "type": "object",
+        "properties": {
+          "weeks_completed_100": { "type": "array", "items": { "type": "integer" } }
+        },
+        "required": ["weeks_completed_100"]
+      },
+      "OneRMOut": {
+        "type": "object",
+        "properties": {
+          "exercise": { "type": "string" },
+          "estimated_1rm_kg": { "type": "number", "description": "Estimated one-rep max in kg" },
+          "based_on_value": { "type": "number", "description": "The weight used in the calculation" },
+          "based_on_reps": { "type": "integer", "description": "The reps used in the calculation" },
+          "formula": { "type": "string", "description": "epley or brzycki" }
+        },
+        "required": ["exercise", "formula"]
+      },
+      "VolumeOut": {
+        "type": "object",
+        "properties": {
+          "exercise": { "type": "string" },
+          "total_volume": { "type": "number", "description": "Sum of (value x reps) across all sets" },
+          "total_sets": { "type": "integer" },
+          "total_reps": { "type": "integer" },
+          "unit": { "type": "string" }
+        },
+        "required": ["exercise", "total_volume", "total_sets", "total_reps"]
+      },
+      "WeeklyVolumeOut": {
+        "type": "object",
+        "properties": {
+          "cycle": { "type": "integer" },
+          "week": { "type": "integer" },
+          "exercises": { "type": "array", "items": { "$ref": "#/components/schemas/VolumeOut" } },
+          "grand_total_volume": { "type": "number" },
+          "grand_total_sets": { "type": "integer" }
+        },
+        "required": ["exercises", "grand_total_volume", "grand_total_sets"]
+      },
+      "TimelinePointOut": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string" },
+          "best_value": { "type": "number" },
+          "unit": { "type": "string" },
+          "total_sets": { "type": "integer" },
+          "total_reps": { "type": "integer" }
+        },
+        "required": ["date", "best_value", "total_sets", "total_reps"]
+      },
+      "ExerciseTimelineOut": {
+        "type": "object",
+        "properties": {
+          "exercise": { "type": "string" },
+          "timeline": { "type": "array", "items": { "$ref": "#/components/schemas/TimelinePointOut" } }
+        },
+        "required": ["exercise", "timeline"]
+      },
+      "VerifyOut": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string" },
+          "exercise": { "type": "string" },
+          "expected_sets": { "type": "integer" },
+          "actual_sets": { "type": "integer" },
+          "match": { "type": "boolean", "description": "true if expected_sets == actual_sets" },
+          "logged": { "type": "array", "items": { "$ref": "#/components/schemas/WorkoutOut" } }
+        },
+        "required": ["date", "actual_sets", "match", "logged"]
+      },
+      "UndoOut": {
+        "type": "object",
+        "properties": {
+          "deleted": { "type": "integer" },
+          "ids": { "type": "array", "items": { "type": "integer" } }
+        },
+        "required": ["deleted", "ids"]
+      },
+      "SearchExerciseOut": {
+        "type": "object",
+        "properties": {
+          "exercise": { "type": "string" },
+          "logged": { "type": "array", "items": { "$ref": "#/components/schemas/WorkoutOut" } }
+        },
+        "required": ["exercise", "logged"]
+      },
+      "CsvExportOut": {
+        "type": "object",
+        "properties": {
+          "filename": { "type": "string" },
+          "rows": { "type": "integer" },
+          "csv": { "type": "string" }
+        },
+        "required": ["filename", "rows", "csv"]
+      }
+    }
+  }
+}
