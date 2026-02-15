@@ -43,33 +43,6 @@
         }
       }
     },
-    "/debug/exercises": {
-      "get": {
-        "operationId": "debugExercises",
-        "summary": "Top exercises by count",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": { "type": "integer", "default": 50, "minimum": 1, "maximum": 500 }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Exercise list with counts",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/ExerciseCountOut" }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/workouts": {
       "post": {
         "operationId": "addWorkout",
@@ -189,30 +162,6 @@
         "responses": {
           "200": {
             "description": "Matching workouts",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/WorkoutOut" }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/workouts/by_cwd": {
-      "get": {
-        "operationId": "workoutsByCWD",
-        "summary": "Get workouts by Cycle/Week/Day (used for verification)",
-        "parameters": [
-          { "name": "cycle", "in": "query", "required": true, "schema": { "type": "integer", "minimum": 0 } },
-          { "name": "week", "in": "query", "required": true, "schema": { "type": "integer", "minimum": 0 } },
-          { "name": "day", "in": "query", "required": true, "schema": { "type": "integer", "minimum": 0 } }
-        ],
-        "responses": {
-          "200": {
-            "description": "Workouts for that cycle/week/day",
             "content": {
               "application/json": {
                 "schema": {
@@ -734,30 +683,6 @@
         }
       }
     },
-    "/search_exercise": {
-      "get": {
-        "operationId": "searchExercise",
-        "summary": "Search logged workouts by exercise name with filters",
-        "parameters": [
-          { "name": "exercise", "in": "query", "required": true, "schema": { "type": "string" } },
-          { "name": "cycle", "in": "query", "required": false, "schema": { "type": "integer" } },
-          { "name": "week", "in": "query", "required": false, "schema": { "type": "integer" } },
-          { "name": "iso_week", "in": "query", "required": false, "schema": { "type": "integer" } },
-          { "name": "day", "in": "query", "required": false, "schema": { "type": "integer" } },
-          { "name": "tag", "in": "query", "required": false, "description": "Filter by tag", "schema": { "type": "string" } }
-        ],
-        "responses": {
-          "200": {
-            "description": "Search results",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SearchExerciseOut" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/export/csv": {
       "get": {
         "operationId": "exportCsv",
@@ -802,14 +727,6 @@
           "metcon_rows": { "type": "integer" }
         },
         "required": ["db_type", "workout_rows", "metcon_rows"]
-      },
-      "ExerciseCountOut": {
-        "type": "object",
-        "properties": {
-          "exercise": { "type": "string" },
-          "count": { "type": "integer" }
-        },
-        "required": ["exercise", "count"]
       },
       "WorkoutIn": {
         "type": "object",
@@ -1103,14 +1020,6 @@
           "ids": { "type": "array", "items": { "type": "integer" } }
         },
         "required": ["deleted", "ids"]
-      },
-      "SearchExerciseOut": {
-        "type": "object",
-        "properties": {
-          "exercise": { "type": "string" },
-          "logged": { "type": "array", "items": { "$ref": "#/components/schemas/WorkoutOut" } }
-        },
-        "required": ["exercise", "logged"]
       },
       "CsvExportOut": {
         "type": "object",
