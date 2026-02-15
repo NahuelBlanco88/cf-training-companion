@@ -88,7 +88,7 @@
           { "name": "exercise", "in": "query", "required": false, "schema": { "type": "string" } },
           { "name": "cycle", "in": "query", "required": false, "schema": { "type": "integer" } },
           { "name": "week", "in": "query", "required": false, "schema": { "type": "integer" } },
-          { "name": "iso_week", "in": "query", "required": false, "schema": { "type": "integer" } },
+
           { "name": "day", "in": "query", "required": false, "schema": { "type": "integer" } },
           { "name": "start", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
           { "name": "end", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
@@ -154,7 +154,7 @@
           { "name": "cycle", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0 } },
           { "name": "week", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0 } },
           { "name": "day", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0 } },
-          { "name": "iso_week", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0 } },
+
           { "name": "start", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
           { "name": "end", "in": "query", "required": false, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
           { "name": "tag", "in": "query", "required": false, "description": "Filter by tag", "schema": { "type": "string" } }
@@ -739,7 +739,7 @@
           "unit": { "type": "string", "description": "kg, sec, cal, m, min" },
           "cycle": { "type": "integer", "description": "Training cycle number" },
           "week": { "type": "integer", "description": "Week within cycle" },
-          "iso_week": { "type": "integer", "description": "ISO calendar week number" },
+
           "day": { "type": "integer", "description": "Training day number (1-7)" },
           "notes": { "type": "string", "default": "" },
           "tags": { "type": "string", "description": "Comma-separated tags (e.g. 'pr attempt,deload'). Auto-normalized to lowercase." }
@@ -758,7 +758,7 @@
           "unit": { "type": "string" },
           "cycle": { "type": "integer" },
           "week": { "type": "integer" },
-          "iso_week": { "type": "integer" },
+
           "day": { "type": "integer" },
           "notes": { "type": "string" },
           "tags": { "type": "string" }
@@ -799,7 +799,7 @@
           "time_cap_seconds": { "type": "integer", "description": "Time cap in seconds" },
           "cycle": { "type": "integer", "description": "Training cycle number" },
           "week": { "type": "integer", "description": "Week within cycle" },
-          "iso_week": { "type": "integer", "description": "ISO calendar week number" },
+
           "day": { "type": "integer", "description": "Training day number" },
           "notes": { "type": "string", "default": "" },
           "tags": { "type": "string", "description": "Comma-separated tags. Auto-normalized to lowercase." }
@@ -822,7 +822,7 @@
           "time_cap_seconds": { "type": "integer" },
           "cycle": { "type": "integer" },
           "week": { "type": "integer" },
-          "iso_week": { "type": "integer" },
+
           "day": { "type": "integer" },
           "notes": { "type": "string" },
           "tags": { "type": "string" }

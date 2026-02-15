@@ -202,7 +202,6 @@ class WorkoutIn(BaseModel):
     unit: Optional[str] = None
     cycle: Optional[int] = None
     week: Optional[int] = None
-    iso_week: Optional[int] = None
     day: Optional[int] = None
     notes: Optional[str] = ""
     tags: Optional[str] = None
@@ -236,7 +235,6 @@ class WorkoutOut(BaseModel):
     unit: Optional[str] = None
     cycle: Optional[int] = None
     week: Optional[int] = None
-    iso_week: Optional[int] = None
     day: Optional[int] = None
     notes: Optional[str] = ""
     tags: Optional[str] = None
@@ -268,7 +266,6 @@ class MetconIn(BaseModel):
     time_cap_seconds: Optional[int] = None
     cycle: Optional[int] = None
     week: Optional[int] = None
-    iso_week: Optional[int] = None
     day: Optional[int] = None
     notes: Optional[str] = ""
     tags: Optional[str] = None
@@ -324,7 +321,6 @@ class MetconOut(BaseModel):
     time_cap_seconds: Optional[int] = None
     cycle: Optional[int] = None
     week: Optional[int] = None
-    iso_week: Optional[int] = None
     day: Optional[int] = None
     notes: Optional[str] = ""
     tags: Optional[str] = None
@@ -542,7 +538,7 @@ def _row_to_out(w: Workout) -> WorkoutOut:
         id=w.id, date=w.date, exercise=w.exercise, set_number=w.set_number,
         reps=int(w.reps) if w.reps is not None else None,
         value=w.value, unit=w.unit, cycle=w.cycle, week=w.week,
-        iso_week=w.iso_week, day=w.day, notes=w.notes, tags=w.tags,
+        day=w.day, notes=w.notes, tags=w.tags,
     )
 
 
@@ -553,7 +549,7 @@ def _metcon_to_out(m: Metcon) -> MetconOut:
         score_rounds=m.score_rounds, score_reps=m.score_reps,
         score_display=m.score_display, rx=m.rx,
         time_cap_seconds=m.time_cap_seconds, cycle=m.cycle, week=m.week,
-        iso_week=m.iso_week, day=m.day, notes=m.notes, tags=m.tags,
+        day=m.day, notes=m.notes, tags=m.tags,
     )
 
 
@@ -685,7 +681,7 @@ async def add_workouts_bulk(
 async def search_workouts(
     q: str = Query(..., min_length=1, description="exercise name or part of it"),
     cycle: Optional[int] = Query(None, ge=0), week: Optional[int] = Query(None, ge=0),
-    day: Optional[int] = Query(None, ge=0), iso_week: Optional[int] = Query(None, ge=0),
+    day: Optional[int] = Query(None, ge=0),
     start: Optional[str] = Query(None, description="YYYY-MM-DD"),
     end: Optional[str] = Query(None, description="YYYY-MM-DD"),
     tag: Optional[str] = Query(None, description="filter by tag"),
@@ -701,7 +697,6 @@ async def search_workouts(
         if cycle is not None: stmt = stmt.where(Workout.cycle == cycle)
         if week is not None: stmt = stmt.where(Workout.week == week)
         if day is not None: stmt = stmt.where(Workout.day == day)
-        if iso_week is not None: stmt = stmt.where(Workout.iso_week == iso_week)
         if start: stmt = stmt.where(Workout.date >= start)
         if end: stmt = stmt.where(Workout.date <= end)
         if tag: stmt = stmt.where(_safe_like(Workout.tags, tag))
@@ -714,7 +709,7 @@ async def search_workouts(
 @app.get("/workouts", response_model=List[WorkoutOut])
 async def query_workouts(
     exercise: Optional[str] = None, cycle: Optional[int] = None,
-    week: Optional[int] = None, iso_week: Optional[int] = None,
+    week: Optional[int] = None,
     day: Optional[int] = None, start: Optional[str] = None,
     end: Optional[str] = None, tag: Optional[str] = None,
 ) -> List[WorkoutOut]:
@@ -722,7 +717,6 @@ async def query_workouts(
     if exercise: stmt = stmt.where(_safe_like(Workout.exercise, exercise))
     if cycle is not None: stmt = stmt.where(Workout.cycle == cycle)
     if week is not None: stmt = stmt.where(Workout.week == week)
-    if iso_week is not None: stmt = stmt.where(Workout.iso_week == iso_week)
     if day is not None: stmt = stmt.where(Workout.day == day)
     if start: stmt = stmt.where(Workout.date >= start)
     if end: stmt = stmt.where(Workout.date <= end)
@@ -1193,13 +1187,12 @@ async def exercise_timeline(
 @app.get("/search_exercise", response_model=SearchExerciseOut)
 async def search_exercise(
     exercise: str, cycle: Optional[int] = None, week: Optional[int] = None,
-    iso_week: Optional[int] = None, day: Optional[int] = None, tag: Optional[str] = None,
+    day: Optional[int] = None, tag: Optional[str] = None,
 ) -> SearchExerciseOut:
     async with async_session() as s:
         stmt = select(Workout).where(_safe_like(Workout.exercise, exercise))
         if cycle is not None: stmt = stmt.where(Workout.cycle == cycle)
         if week is not None: stmt = stmt.where(Workout.week == week)
-        if iso_week is not None: stmt = stmt.where(Workout.iso_week == iso_week)
         if day is not None: stmt = stmt.where(Workout.day == day)
         if tag: stmt = stmt.where(_safe_like(Workout.tags, tag))
         rows = (await s.execute(stmt.order_by(asc(Workout.date), asc(Workout.id)))).scalars().all()
@@ -1213,8 +1206,8 @@ async def export_csv() -> CsvExportOut:
     buf = io.StringIO()
     writer = csv.writer(buf)
     writer.writerow(["id", "date", "exercise", "set_number", "reps", "value", "unit",
-                      "cycle", "week", "iso_week", "day", "notes", "tags"])
+                      "cycle", "week", "day", "notes", "tags"])
     for w in rows:
         writer.writerow([w.id, w.date, w.exercise, w.set_number, w.reps, w.value, w.unit,
-                          w.cycle, w.week, w.iso_week, w.day, (w.notes or ""), (w.tags or "")])
+                          w.cycle, w.week, w.day, (w.notes or ""), (w.tags or "")])
     return CsvExportOut(filename="workouts.csv", rows=len(rows), csv=buf.getvalue())
