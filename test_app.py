@@ -1,5 +1,5 @@
 """
-Test suite for CF-Log API v11.
+Test suite for CF-Log API v12.
 Uses an in-memory SQLite database via aiosqlite.
 """
 import pytest
@@ -44,11 +44,22 @@ VALID_WORKOUT = {
     "reps": 5,
     "value": 100.0,
     "unit": "kg",
-    "rpe": 8.0,
     "cycle": 1,
     "week": 1,
     "day": 1,
     "notes": "felt good",
+}
+
+VALID_METCON = {
+    "date": "2026-01-20",
+    "name": "Fran",
+    "workout_type": "for_time",
+    "description": "21-15-9 Thrusters (43kg) & Pull-ups",
+    "score_time_seconds": 245,
+    "score_display": "4:05",
+    "rx": "rx",
+    "notes": "PR!",
+    "tags": "benchmark,pr",
 }
 
 
@@ -58,7 +69,7 @@ VALID_WORKOUT = {
 async def test_root(client):
     r = await client.get("/")
     assert r.status_code == 200
-    assert "v11" in r.json()["message"]
+    assert "v12" in r.json()["message"]
 
 
 @pytest.mark.asyncio
@@ -83,13 +94,6 @@ async def test_invalid_date_format(client):
 @pytest.mark.asyncio
 async def test_invalid_date_calendar(client):
     w = {**VALID_WORKOUT, "date": "2026-02-30"}
-    r = await client.post("/workouts", json=w)
-    assert r.status_code == 422
-
-
-@pytest.mark.asyncio
-async def test_rpe_out_of_range(client):
-    w = {**VALID_WORKOUT, "rpe": 11.0}
     r = await client.post("/workouts", json=w)
     assert r.status_code == 422
 
@@ -221,6 +225,17 @@ async def test_bulk_duplicate_detection(client):
     assert r.status_code == 409
 
 
+@pytest.mark.asyncio
+async def test_no_false_duplicate_without_set_number(client):
+    """When set_number is omitted, multiple sets should be allowed (no dup block)."""
+    w = {**VALID_WORKOUT}
+    del w["set_number"]
+    r1 = await client.post("/workouts", json=w)
+    assert r1.status_code == 200
+    r2 = await client.post("/workouts", json=w)
+    assert r2.status_code == 200  # should NOT be 409
+
+
 # ─── Search ──────────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio
@@ -296,6 +311,7 @@ async def test_stats(client):
     assert r.status_code == 200
     data = r.json()
     assert data["total_sessions"] == 1
+    assert data["total_metcons"] == 0
     assert "Back Squat" in data["bests"]
 
 
@@ -526,8 +542,10 @@ async def test_dbinfo(client):
     await client.post("/workouts", json=VALID_WORKOUT)
     r = await client.get("/debug/dbinfo")
     assert r.status_code == 200
-    assert r.json()["workout_rows"] == 1
-    assert "SQLite" in r.json()["db_type"]
+    data = r.json()
+    assert data["workout_rows"] == 1
+    assert data["metcon_rows"] == 0
+    assert "SQLite" in data["db_type"]
 
 
 @pytest.mark.asyncio
@@ -559,3 +577,364 @@ async def test_rate_limit_headers(client):
     r = await client.get("/")
     assert "X-RateLimit-Limit" in r.headers
     assert "X-RateLimit-Remaining" in r.headers
+
+
+# =============================================================================
+# METCON TESTS
+# =============================================================================
+
+# ─── Metcon Validation ───────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_metcon_invalid_date(client):
+    m = {**VALID_METCON, "date": "20-01-2026"}
+    r = await client.post("/metcons", json=m)
+    assert r.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_metcon_empty_name_rejected(client):
+    m = {**VALID_METCON, "name": "   "}
+    r = await client.post("/metcons", json=m)
+    assert r.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_metcon_invalid_workout_type(client):
+    m = {**VALID_METCON, "workout_type": "crossfit"}
+    r = await client.post("/metcons", json=m)
+    assert r.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_metcon_invalid_rx(client):
+    m = {**VALID_METCON, "rx": "modified"}
+    r = await client.post("/metcons", json=m)
+    assert r.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_metcon_name_normalized(client):
+    m = {**VALID_METCON, "name": "fran"}
+    r = await client.post("/metcons", json=m)
+    assert r.status_code == 200
+    r2 = await client.get("/metcons", params={"name": "Fran"})
+    assert r2.status_code == 200
+    assert len(r2.json()) == 1
+    assert r2.json()[0]["name"] == "Fran"
+
+
+@pytest.mark.asyncio
+async def test_metcon_tags_normalized(client):
+    m = {**VALID_METCON, "tags": " Benchmark , PR , "}
+    r = await client.post("/metcons", json=m)
+    assert r.status_code == 200
+    r2 = await client.get("/metcons")
+    assert r2.json()[0]["tags"] == "benchmark,pr"
+
+
+# ─── Metcon CRUD ─────────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_add_and_get_metcon(client):
+    r = await client.post("/metcons", json=VALID_METCON)
+    assert r.status_code == 200
+    assert r.json()["message"] == "Metcon saved"
+
+    r2 = await client.get("/metcons")
+    data = r2.json()
+    assert len(data) == 1
+    assert data[0]["name"] == "Fran"
+    assert data[0]["workout_type"] == "for_time"
+    assert data[0]["score_time_seconds"] == 245
+    assert data[0]["rx"] == "rx"
+
+
+@pytest.mark.asyncio
+async def test_metcon_bulk(client):
+    metcons = [
+        {**VALID_METCON, "name": f"WOD {i}", "date": f"2026-01-{20+i:02d}"}
+        for i in range(1, 4)
+    ]
+    r = await client.post("/metcons/bulk", json={"metcons": metcons})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["saved"] == 3
+    assert len(data["ids"]) == 3
+
+
+@pytest.mark.asyncio
+async def test_metcon_bulk_empty_rejected(client):
+    r = await client.post("/metcons/bulk", json={"metcons": []})
+    assert r.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_edit_metcon(client):
+    await client.post("/metcons", json=VALID_METCON)
+    r = await client.get("/metcons")
+    mid = r.json()[0]["id"]
+
+    updated = {**VALID_METCON, "score_time_seconds": 220, "score_display": "3:40"}
+    r2 = await client.put(f"/metcons/{mid}", json=updated)
+    assert r2.status_code == 200
+    assert r2.json()["score_time_seconds"] == 220
+
+
+@pytest.mark.asyncio
+async def test_delete_metcon(client):
+    await client.post("/metcons", json=VALID_METCON)
+    r = await client.get("/metcons")
+    mid = r.json()[0]["id"]
+
+    r2 = await client.delete(f"/metcons/{mid}")
+    assert r2.status_code == 200
+
+    r3 = await client.get("/metcons")
+    assert len(r3.json()) == 0
+
+
+@pytest.mark.asyncio
+async def test_delete_metcon_not_found(client):
+    r = await client.delete("/metcons/99999")
+    assert r.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_last_metcon(client):
+    await client.post("/metcons", json=VALID_METCON)
+    r = await client.get("/metcons/last", params={"name": "fran"})
+    assert r.status_code == 200
+    assert r.json()["name"] == "Fran"
+
+
+@pytest.mark.asyncio
+async def test_last_metcon_not_found(client):
+    r = await client.get("/metcons/last", params={"name": "unicorn"})
+    assert r.status_code == 404
+
+
+# ─── Metcon Search & Query ───────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_metcon_search(client):
+    await client.post("/metcons", json=VALID_METCON)
+    r = await client.get("/metcons/search", params={"q": "fran"})
+    assert r.status_code == 200
+    assert len(r.json()) == 1
+
+
+@pytest.mark.asyncio
+async def test_metcon_search_by_type(client):
+    await client.post("/metcons", json=VALID_METCON)
+    r = await client.get("/metcons/search", params={"q": "fran", "workout_type": "for_time"})
+    assert r.status_code == 200
+    assert len(r.json()) == 1
+
+    r2 = await client.get("/metcons/search", params={"q": "fran", "workout_type": "amrap"})
+    assert r2.status_code == 200
+    assert len(r2.json()) == 0
+
+
+@pytest.mark.asyncio
+async def test_metcon_search_by_rx(client):
+    await client.post("/metcons", json=VALID_METCON)
+    r = await client.get("/metcons/search", params={"q": "fran", "rx": "rx"})
+    assert r.status_code == 200
+    assert len(r.json()) == 1
+
+    r2 = await client.get("/metcons/search", params={"q": "fran", "rx": "scaled"})
+    assert r2.status_code == 200
+    assert len(r2.json()) == 0
+
+
+@pytest.mark.asyncio
+async def test_metcon_query_filters(client):
+    m1 = {**VALID_METCON, "cycle": 1, "week": 1}
+    m2 = {**VALID_METCON, "name": "Murph", "cycle": 1, "week": 2,
+           "workout_type": "for_time", "score_time_seconds": 2400, "score_display": "40:00"}
+    await client.post("/metcons", json=m1)
+    await client.post("/metcons", json=m2)
+
+    r = await client.get("/metcons", params={"cycle": 1, "week": 1})
+    assert r.status_code == 200
+    assert len(r.json()) == 1
+    assert r.json()[0]["name"] == "Fran"
+
+
+@pytest.mark.asyncio
+async def test_metcon_search_by_tag(client):
+    await client.post("/metcons", json=VALID_METCON)
+    r = await client.get("/metcons/search", params={"q": "fran", "tag": "benchmark"})
+    assert r.status_code == 200
+    assert len(r.json()) == 1
+
+    r2 = await client.get("/metcons/search", params={"q": "fran", "tag": "deload"})
+    assert r2.status_code == 200
+    assert len(r2.json()) == 0
+
+
+# ─── Metcon Analytics: PRs ───────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_metcon_prs_for_time(client):
+    """For timed WODs, PR = fastest time."""
+    m1 = {**VALID_METCON, "score_time_seconds": 300, "score_display": "5:00"}
+    m2 = {**VALID_METCON, "date": "2026-02-01", "score_time_seconds": 245, "score_display": "4:05"}
+    await client.post("/metcons", json=m1)
+    await client.post("/metcons", json=m2)
+
+    r = await client.get("/analytics/metcon_prs", params={"name": "fran"})
+    assert r.status_code == 200
+    prs = r.json()["benchmarks"]
+    assert len(prs) == 1
+    assert prs[0]["name"] == "Fran"
+    assert prs[0]["best_time_seconds"] == 245
+    assert prs[0]["best_time_display"] == "4:05"
+
+
+@pytest.mark.asyncio
+async def test_metcon_prs_amrap(client):
+    """For AMRAP, PR = most rounds+reps."""
+    m1 = {
+        "date": "2026-01-20", "name": "Cindy", "workout_type": "amrap",
+        "description": "20min AMRAP: 5 Pull-ups, 10 Push-ups, 15 Squats",
+        "score_rounds": 18, "score_reps": 3, "score_display": "18+3", "rx": "rx",
+    }
+    m2 = {
+        "date": "2026-02-20", "name": "Cindy", "workout_type": "amrap",
+        "score_rounds": 20, "score_reps": 0, "score_display": "20+0", "rx": "rx",
+    }
+    await client.post("/metcons", json=m1)
+    await client.post("/metcons", json=m2)
+
+    r = await client.get("/analytics/metcon_prs", params={"name": "cindy"})
+    assert r.status_code == 200
+    prs = r.json()["benchmarks"]
+    assert len(prs) == 1
+    assert prs[0]["best_rounds"] == 20
+    assert prs[0]["best_reps"] == 0
+
+
+@pytest.mark.asyncio
+async def test_metcon_prs_all(client):
+    """Get all PRs when no name filter."""
+    await client.post("/metcons", json=VALID_METCON)
+    amrap = {
+        "date": "2026-01-25", "name": "Cindy", "workout_type": "amrap",
+        "score_rounds": 18, "score_reps": 3, "rx": "rx",
+    }
+    await client.post("/metcons", json=amrap)
+
+    r = await client.get("/analytics/metcon_prs")
+    assert r.status_code == 200
+    prs = r.json()["benchmarks"]
+    assert len(prs) == 2
+    names = {p["name"] for p in prs}
+    assert "Fran" in names
+    assert "Cindy" in names
+
+
+@pytest.mark.asyncio
+async def test_metcon_prs_rx_filter(client):
+    m_rx = {**VALID_METCON, "rx": "rx", "score_time_seconds": 300}
+    m_scaled = {**VALID_METCON, "date": "2026-02-01", "rx": "scaled", "score_time_seconds": 200}
+    await client.post("/metcons", json=m_rx)
+    await client.post("/metcons", json=m_scaled)
+
+    r = await client.get("/analytics/metcon_prs", params={"name": "fran", "rx": "rx"})
+    prs = r.json()["benchmarks"]
+    assert len(prs) == 1
+    assert prs[0]["rx"] == "rx"
+    assert prs[0]["best_time_seconds"] == 300
+
+
+# ─── Metcon Analytics: Timeline ──────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_metcon_timeline(client):
+    m1 = {**VALID_METCON, "date": "2026-01-10", "score_time_seconds": 300, "score_display": "5:00"}
+    m2 = {**VALID_METCON, "date": "2026-02-10", "score_time_seconds": 260, "score_display": "4:20"}
+    m3 = {**VALID_METCON, "date": "2026-03-10", "score_time_seconds": 245, "score_display": "4:05"}
+    await client.post("/metcons", json=m1)
+    await client.post("/metcons", json=m2)
+    await client.post("/metcons", json=m3)
+
+    r = await client.get("/analytics/metcon_timeline", params={"name": "fran"})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["name"] == "fran"
+    assert data["workout_type"] == "for_time"
+    assert len(data["timeline"]) == 3
+    # Verify chronological order
+    assert data["timeline"][0]["score_time_seconds"] == 300
+    assert data["timeline"][1]["score_time_seconds"] == 260
+    assert data["timeline"][2]["score_time_seconds"] == 245
+
+
+@pytest.mark.asyncio
+async def test_metcon_timeline_date_range(client):
+    m1 = {**VALID_METCON, "date": "2026-01-10", "score_time_seconds": 300}
+    m2 = {**VALID_METCON, "date": "2026-02-10", "score_time_seconds": 260}
+    m3 = {**VALID_METCON, "date": "2026-03-10", "score_time_seconds": 245}
+    await client.post("/metcons", json=m1)
+    await client.post("/metcons", json=m2)
+    await client.post("/metcons", json=m3)
+
+    r = await client.get("/analytics/metcon_timeline", params={
+        "name": "fran", "start": "2026-02-01", "end": "2026-02-28"
+    })
+    assert r.status_code == 200
+    assert len(r.json()["timeline"]) == 1
+
+
+@pytest.mark.asyncio
+async def test_metcon_timeline_empty(client):
+    r = await client.get("/analytics/metcon_timeline", params={"name": "unicorn"})
+    assert r.status_code == 200
+    assert len(r.json()["timeline"]) == 0
+
+
+# ─── Stats with Metcons ─────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_stats_with_metcons(client):
+    await client.post("/workouts", json=VALID_WORKOUT)
+    await client.post("/metcons", json=VALID_METCON)
+    r = await client.get("/stats")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["total_sessions"] == 1
+    assert data["total_metcons"] == 1
+
+
+@pytest.mark.asyncio
+async def test_dbinfo_with_metcons(client):
+    await client.post("/workouts", json=VALID_WORKOUT)
+    await client.post("/metcons", json=VALID_METCON)
+    r = await client.get("/debug/dbinfo")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["workout_rows"] == 1
+    assert data["metcon_rows"] == 1
+
+
+# ─── Metcon workout types ───────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_metcon_all_valid_types(client):
+    """All six valid workout types should be accepted."""
+    valid_types = ["for_time", "amrap", "emom", "chipper", "interval", "other"]
+    for wt in valid_types:
+        m = {**VALID_METCON, "name": f"Test {wt}", "workout_type": wt}
+        r = await client.post("/metcons", json=m)
+        assert r.status_code == 200, f"Failed for workout_type={wt}"
+
+
+@pytest.mark.asyncio
+async def test_metcon_all_valid_rx(client):
+    """All three valid rx values should be accepted."""
+    for rx_val in ["rx", "scaled", "rx_plus"]:
+        m = {**VALID_METCON, "name": f"Test {rx_val}", "rx": rx_val}
+        r = await client.post("/metcons", json=m)
+        assert r.status_code == 200, f"Failed for rx={rx_val}"
