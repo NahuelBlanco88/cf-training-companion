@@ -128,10 +128,12 @@ class Metcon(Base):
 async def _init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    # Migrations for workout table
     async with engine.begin() as conn:
         for col_name, col_sql in [
             ("set_number", "ALTER TABLE workout ADD COLUMN set_number INTEGER"),
             ("tags", "ALTER TABLE workout ADD COLUMN tags VARCHAR"),
+            ("iso_week", "ALTER TABLE workout ADD COLUMN iso_week INTEGER"),
         ]:
             try:
                 await conn.execute(text(f"SELECT {col_name} FROM workout LIMIT 1"))
@@ -140,7 +142,20 @@ async def _init_db():
                     await conn.execute(text(col_sql))
                     log.info(f"Added {col_name} column to workout table")
                 except Exception as e:
-                    log.warning(f"Migration for {col_name}: {e}")
+                    log.warning(f"Migration for {col_name} (workout): {e}")
+    # Migrations for metcon table
+    async with engine.begin() as conn:
+        for col_name, col_sql in [
+            ("iso_week", "ALTER TABLE metcon ADD COLUMN iso_week INTEGER"),
+        ]:
+            try:
+                await conn.execute(text(f"SELECT {col_name} FROM metcon LIMIT 1"))
+            except Exception:
+                try:
+                    await conn.execute(text(col_sql))
+                    log.info(f"Added {col_name} column to metcon table")
+                except Exception as e:
+                    log.warning(f"Migration for {col_name} (metcon): {e}")
 
 
 # -----------------------------------------------------------------------------
