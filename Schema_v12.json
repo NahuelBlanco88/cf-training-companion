@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.0",
   "info": {
     "title": "CF-Log API",
     "description": "CrossFit Training Log & Analytics API v12. Strength sets + metcon/benchmark tracking. RPE removed. One row per working set for strength; one row per metcon result for conditioning.",
@@ -27,16 +27,21 @@
         }
       }
     },
-    "/debug/dbinfo": {
+    "/day_summary": {
       "get": {
-        "operationId": "dbinfo",
-        "summary": "Database info — type, workout row count, metcon row count",
+        "operationId": "daySummary",
+        "summary": "Get everything logged for a training day — both strength sets AND metcons in one call. Use this when the user asks about a specific day.",
+        "parameters": [
+          { "name": "cycle", "in": "query", "required": true, "schema": { "type": "integer", "minimum": 0 } },
+          { "name": "week", "in": "query", "required": true, "schema": { "type": "integer", "minimum": 0 } },
+          { "name": "day", "in": "query", "required": true, "schema": { "type": "integer", "minimum": 0 } }
+        ],
         "responses": {
           "200": {
-            "description": "DB info",
+            "description": "Day summary with workouts and metcons",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/DBInfoOut" }
+                "schema": { "$ref": "#/components/schemas/DaySummaryOut" }
               }
             }
           }
@@ -719,14 +724,19 @@
         },
         "required": ["message"]
       },
-      "DBInfoOut": {
+      "DaySummaryOut": {
         "type": "object",
+        "description": "Everything logged for a specific cycle/week/day — both workouts and metcons combined",
         "properties": {
-          "db_type": { "type": "string" },
-          "workout_rows": { "type": "integer" },
-          "metcon_rows": { "type": "integer" }
+          "cycle": { "type": "integer" },
+          "week": { "type": "integer" },
+          "day": { "type": "integer" },
+          "workouts": { "type": "array", "items": { "$ref": "#/components/schemas/WorkoutOut" } },
+          "metcons": { "type": "array", "items": { "$ref": "#/components/schemas/MetconOut" } },
+          "total_workout_sets": { "type": "integer", "description": "Number of strength sets logged" },
+          "total_metcons": { "type": "integer", "description": "Number of metcon results logged" }
         },
-        "required": ["db_type", "workout_rows", "metcon_rows"]
+        "required": ["cycle", "week", "day", "workouts", "metcons", "total_workout_sets", "total_metcons"]
       },
       "WorkoutIn": {
         "type": "object",
