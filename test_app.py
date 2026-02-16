@@ -1,5 +1,5 @@
 """
-Test suite for CF-Log API v12.
+Test suite for CF-Log API v13.
 Uses an in-memory SQLite database via aiosqlite.
 """
 import pytest
@@ -69,7 +69,7 @@ VALID_METCON = {
 async def test_root(client):
     r = await client.get("/")
     assert r.status_code == 200
-    assert "v12" in r.json()["message"]
+    assert "v13" in r.json()["message"]
 
 
 @pytest.mark.asyncio
@@ -124,7 +124,10 @@ async def test_empty_exercise_rejected(client):
 async def test_add_and_get_workout(client):
     r = await client.post("/workouts", json=VALID_WORKOUT)
     assert r.status_code == 200
-    assert r.json()["message"] == "Workout saved"
+    data = r.json()
+    assert data["id"] is not None
+    assert data["exercise"] == "Back Squat"
+    assert data["value"] == 100.0
 
     r2 = await client.get("/workouts")
     data = r2.json()
@@ -383,7 +386,9 @@ async def test_consistency(client):
         await client.post("/workouts", json=w, params={"force": True})
     r = await client.get("/analytics/consistency", params={"cycle": 1})
     assert r.status_code == 200
-    assert 1 in r.json()["weeks_completed_100"]
+    data = r.json()
+    assert data["total"] > 0
+    assert any(w["cycle"] == 1 and w["week"] == 1 for w in data["completed_weeks"])
 
 
 # ─── 1RM Calculator ─────────────────────────────────────────────────────────
@@ -639,7 +644,11 @@ async def test_metcon_tags_normalized(client):
 async def test_add_and_get_metcon(client):
     r = await client.post("/metcons", json=VALID_METCON)
     assert r.status_code == 200
-    assert r.json()["message"] == "Metcon saved"
+    data = r.json()
+    assert data["id"] is not None
+    assert data["name"] == "Fran"
+    assert data["workout_type"] == "for_time"
+    assert data["score_time_seconds"] == 245
 
     r2 = await client.get("/metcons")
     data = r2.json()
