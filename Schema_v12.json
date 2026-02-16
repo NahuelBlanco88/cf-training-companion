@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.0",
   "info": {
     "title": "CF-Log API",
     "description": "CrossFit Training Log & Analytics API v12. Strength sets + metcon/benchmark tracking. RPE removed. One row per working set for strength; one row per metcon result for conditioning.",
