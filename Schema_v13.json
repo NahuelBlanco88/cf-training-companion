@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.1.0",
   "info": {
     "title": "CF-Log API",
     "description": "CrossFit Training Log & Analytics API v13.\n\nTracks strength working sets (one row per set) and conditioning/benchmark results (metcons).\nOrganized by training cycles (1-8) and weeks (1-4 per cycle, 32 total).\n\nKey rules:\n- Use /workouts/bulk to log multiple sets in one call (preferred over single POST)\n- After saving, call POST /workouts/verify to confirm data was stored correctly\n- Use /day_summary when the user asks about a specific training day\n- Exercise names are auto-normalized to Title Case\n- Tags are auto-normalized to lowercase\n- Dates must be YYYY-MM-DD format",
