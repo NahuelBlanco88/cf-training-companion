@@ -765,15 +765,8 @@ async def last_workout(exercise: str = Query(..., min_length=1)) -> WorkoutOut:
         return _row_to_out(row)
 
 
-@app.get("/workouts/verify", response_model=VerifyOut)
-async def verify_workouts(
-    date: str = Query(..., description="YYYY-MM-DD"),
-    exercise: Optional[str] = Query(None),
-    expected_sets: Optional[int] = Query(None, ge=1),
-    cycle: Optional[int] = Query(None, ge=0),
-    week: Optional[int] = Query(None, ge=0),
-    day: Optional[int] = Query(None, ge=0),
-) -> VerifyOut:
+async def _do_verify(date: str, exercise: Optional[str], expected_sets: Optional[int],
+                     cycle: Optional[int], week: Optional[int], day: Optional[int]) -> VerifyOut:
     stmt = select(Workout).where(Workout.date == date)
     if exercise: stmt = stmt.where(_safe_like(Workout.exercise, exercise))
     if cycle is not None: stmt = stmt.where(Workout.cycle == cycle)
@@ -787,6 +780,33 @@ async def verify_workouts(
     match = expected_sets == actual if expected_sets is not None else actual > 0
     return VerifyOut(date=date, exercise=exercise, expected_sets=expected_sets,
                      actual_sets=actual, match=match, logged=[_row_to_out(w) for w in rows])
+
+
+@app.get("/workouts/verify", response_model=VerifyOut)
+async def verify_workouts(
+    date: str = Query(..., description="YYYY-MM-DD"),
+    exercise: Optional[str] = Query(None),
+    expected_sets: Optional[int] = Query(None, ge=1),
+    cycle: Optional[int] = Query(None, ge=0),
+    week: Optional[int] = Query(None, ge=0),
+    day: Optional[int] = Query(None, ge=0),
+) -> VerifyOut:
+    return await _do_verify(date, exercise, expected_sets, cycle, week, day)
+
+
+class VerifyIn(BaseModel):
+    date: str
+    exercise: Optional[str] = None
+    expected_sets: Optional[int] = None
+    cycle: Optional[int] = None
+    week: Optional[int] = None
+    day: Optional[int] = None
+
+
+@app.post("/workouts/verify", response_model=VerifyOut)
+async def verify_workouts_post(body: VerifyIn = Body(...)) -> VerifyOut:
+    return await _do_verify(body.date, body.exercise, body.expected_sets,
+                            body.cycle, body.week, body.day)
 
 
 # undo_last MUST be before {workout_id}

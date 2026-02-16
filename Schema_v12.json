@@ -200,17 +200,28 @@
       }
     },
     "/workouts/verify": {
-      "get": {
+      "post": {
         "operationId": "verifyWorkouts",
         "summary": "Verify logged workouts — GPT calls this after every save to confirm data",
-        "parameters": [
-          { "name": "date", "in": "query", "required": true, "description": "YYYY-MM-DD", "schema": { "type": "string" } },
-          { "name": "exercise", "in": "query", "required": false, "schema": { "type": "string" } },
-          { "name": "expected_sets", "in": "query", "required": false, "description": "How many sets were expected", "schema": { "type": "integer", "minimum": 1 } },
-          { "name": "cycle", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0 } },
-          { "name": "week", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0 } },
-          { "name": "day", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0 } }
-        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": { "type": "string", "description": "YYYY-MM-DD" },
+                  "exercise": { "type": "string" },
+                  "expected_sets": { "type": "integer", "minimum": 1 },
+                  "cycle": { "type": "integer", "minimum": 0 },
+                  "week": { "type": "integer", "minimum": 0 },
+                  "day": { "type": "integer", "minimum": 0 }
+                },
+                "required": ["date"]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Verification result with match status and logged data",
