@@ -471,6 +471,17 @@ class UndoOut(BaseModel):
     ids: List[int]
 
 
+class DaySummaryOut(BaseModel):
+    """Everything logged for a specific cycle/week/day — workouts + metcons."""
+    cycle: int
+    week: int
+    day: int
+    workouts: List[WorkoutOut] = Field(default_factory=list)
+    metcons: List[MetconOut] = Field(default_factory=list)
+    total_workout_sets: int = 0
+    total_metcons: int = 0
+
+
 # -----------------------------------------------------------------------------
 # App
 # -----------------------------------------------------------------------------
@@ -1211,3 +1222,43 @@ async def export_csv() -> CsvExportOut:
         writer.writerow([w.id, w.date, w.exercise, w.set_number, w.reps, w.value, w.unit,
                           w.cycle, w.week, w.day, (w.notes or ""), (w.tags or "")])
     return CsvExportOut(filename="workouts.csv", rows=len(rows), csv=buf.getvalue())
+
+
+@app.get("/export/metcons_csv", response_model=CsvExportOut)
+async def export_metcons_csv() -> CsvExportOut:
+    async with async_session() as s:
+        rows = (await s.execute(select(Metcon).order_by(asc(Metcon.date), asc(Metcon.id)))).scalars().all()
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["id", "date", "name", "workout_type", "description",
+                      "score_time_seconds", "score_rounds", "score_reps", "score_display",
+                      "rx", "time_cap_seconds", "cycle", "week", "day", "notes", "tags"])
+    for m in rows:
+        writer.writerow([m.id, m.date, m.name, m.workout_type, (m.description or ""),
+                          m.score_time_seconds, m.score_rounds, m.score_reps,
+                          (m.score_display or ""), (m.rx or ""), m.time_cap_seconds,
+                          m.cycle, m.week, m.day, (m.notes or ""), (m.tags or "")])
+    return CsvExportOut(filename="metcons.csv", rows=len(rows), csv=buf.getvalue())
+
+
+@app.get("/day_summary", response_model=DaySummaryOut)
+async def day_summary(
+    cycle: int = Query(..., ge=0), week: int = Query(..., ge=0), day: int = Query(..., ge=0),
+) -> DaySummaryOut:
+    """Get everything logged for a training day — both strength sets and metcons."""
+    async with async_session() as s:
+        w_result = await s.execute(
+            select(Workout).where(Workout.cycle == cycle, Workout.week == week, Workout.day == day)
+            .order_by(asc(Workout.date), asc(Workout.id))
+        )
+        workouts = [_row_to_out(w) for w in w_result.scalars().all()]
+        m_result = await s.execute(
+            select(Metcon).where(Metcon.cycle == cycle, Metcon.week == week, Metcon.day == day)
+            .order_by(asc(Metcon.date), asc(Metcon.id))
+        )
+        metcons = [_metcon_to_out(m) for m in m_result.scalars().all()]
+    return DaySummaryOut(
+        cycle=cycle, week=week, day=day,
+        workouts=workouts, metcons=metcons,
+        total_workout_sets=len(workouts), total_metcons=len(metcons),
+    )

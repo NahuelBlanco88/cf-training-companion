@@ -938,3 +938,57 @@ async def test_metcon_all_valid_rx(client):
         m = {**VALID_METCON, "name": f"Test {rx_val}", "rx": rx_val}
         r = await client.post("/metcons", json=m)
         assert r.status_code == 200, f"Failed for rx={rx_val}"
+
+
+# ─── Day Summary ──────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_day_summary_empty(client):
+    r = await client.get("/day_summary", params={"cycle": 1, "week": 1, "day": 1})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["workouts"] == []
+    assert data["metcons"] == []
+    assert data["total_workout_sets"] == 0
+    assert data["total_metcons"] == 0
+
+
+@pytest.mark.asyncio
+async def test_day_summary_with_data(client):
+    # Add workouts
+    for i in range(1, 4):
+        w = {**VALID_WORKOUT, "set_number": i, "value": 100.0 + i * 5}
+        await client.post("/workouts", json=w)
+    # Add metcon
+    m = {**VALID_METCON, "cycle": 1, "week": 1, "day": 1}
+    await client.post("/metcons", json=m)
+    # Query day summary
+    r = await client.get("/day_summary", params={"cycle": 1, "week": 1, "day": 1})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["total_workout_sets"] == 3
+    assert data["total_metcons"] == 1
+    assert len(data["workouts"]) == 3
+    assert len(data["metcons"]) == 1
+
+
+# ─── Metcon CSV Export ─────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_export_metcons_csv(client):
+    m = {**VALID_METCON, "cycle": 1, "week": 1, "day": 1}
+    await client.post("/metcons", json=m)
+    r = await client.get("/export/metcons_csv")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["filename"] == "metcons.csv"
+    assert data["rows"] == 1
+    assert "Fran" in data["csv"]
+
+
+@pytest.mark.asyncio
+async def test_export_metcons_csv_empty(client):
+    r = await client.get("/export/metcons_csv")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["rows"] == 0
