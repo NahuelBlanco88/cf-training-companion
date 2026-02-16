@@ -2,7 +2,7 @@
 # =============================================================================
 # CF-Log API — Workouts & Analytics (FastAPI + SQLAlchemy 2.x async, Pydantic v2)
 # Results-only: no plan storage. One row per working set for maximum precision.
-# v12.0.0 — metcon/benchmark tracking, RPE removed, async, rate-limited
+# v13.0.0 — returns IDs on create, query limits, consistency fix, GPT-optimized
 # =============================================================================
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ import logging
 import time
 from collections import defaultdict
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path as OSPath
 from typing import AsyncGenerator, Dict, List, Optional
 
@@ -420,8 +420,14 @@ class RepmaxOut(BaseModel):
     workout_id: Optional[int] = None
 
 
+class ConsistencyWeekOut(BaseModel):
+    cycle: int
+    week: int
+
+
 class ConsistencyOut(BaseModel):
-    weeks_completed_100: List[int] = Field(default_factory=list)
+    completed_weeks: List[ConsistencyWeekOut] = Field(default_factory=list)
+    total: int = 0
 
 
 class SearchExerciseOut(BaseModel):
@@ -510,7 +516,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 app = FastAPI(
     title="CF-Log API",
     description="CrossFit Training Log & Analytics API. Strength sets + metcon/benchmark tracking.",
-    version="12.0.0",
+    version="13.0.0",
     lifespan=lifespan,
 )
 
@@ -538,6 +544,12 @@ async def rate_limit_middleware(request: Request, call_next):
             media_type="application/json",
         )
     _rate_limit_store[client_ip].append(now)
+    # Prune stale IPs to prevent memory leak
+    if len(_rate_limit_store) > 1000:
+        stale = [ip for ip, ts in _rate_limit_store.items()
+                 if not ts or ts[-1] < window_start]
+        for ip in stale:
+            del _rate_limit_store[ip]
     response = await call_next(request)
     response.headers["X-RateLimit-Limit"] = str(RATE_LIMIT_REQUESTS)
     response.headers["X-RateLimit-Remaining"] = str(
@@ -628,13 +640,13 @@ async def health() -> HealthOut:
         log.error(f"Health check DB query failed: {e}")
     return HealthOut(
         ok=db_connected, db_connected=db_connected,
-        db_type=_db_type(), timestamp=datetime.utcnow().isoformat(),
+        db_type=_db_type(), timestamp=datetime.now(timezone.utc).isoformat(),
     )
 
 
 @app.get("/", response_model=GenericResponse)
 async def root() -> GenericResponse:
-    return GenericResponse(message="CF-Log API v12 is running")
+    return GenericResponse(message="CF-Log API v13 is running")
 
 
 @app.get("/debug/dbinfo", response_model=DBInfoOut)
@@ -651,12 +663,19 @@ async def dbinfo() -> DBInfoOut:
 
 
 @app.get("/debug/exercises", response_model=List[ExerciseCountOut])
-async def debug_exercises(limit: int = Query(50, ge=1, le=500)) -> List[ExerciseCountOut]:
+async def debug_exercises(
+    q: Optional[str] = Query(None, description="Filter by exercise name"),
+    limit: int = Query(50, ge=1, le=500),
+) -> List[ExerciseCountOut]:
     async with async_session() as s:
-        result = await s.execute(
-            select(Workout.exercise, func.count())
-            .group_by(Workout.exercise).order_by(desc(func.count())).limit(limit)
+        stmt = (
+            select(Workout.exercise, func.count().label("cnt"))
+            .group_by(Workout.exercise)
         )
+        if q:
+            stmt = stmt.where(_safe_like(Workout.exercise, q))
+        stmt = stmt.order_by(desc(func.count())).limit(limit)
+        result = await s.execute(stmt)
         rows = result.all()
     return [ExerciseCountOut(exercise=e or "", count=int(c)) for e, c in rows]
 
@@ -664,10 +683,10 @@ async def debug_exercises(limit: int = Query(50, ge=1, le=500)) -> List[Exercise
 # =============================================================================
 # ENDPOINTS — Workouts (strength sets)
 # =============================================================================
-@app.post("/workouts", response_model=GenericResponse)
+@app.post("/workouts", response_model=WorkoutOut)
 async def add_workout(
     w: WorkoutIn, force: bool = Query(False, description="Skip duplicate check"),
-) -> GenericResponse:
+) -> WorkoutOut:
     async with async_session() as s:
         if not force:
             dups = await _check_duplicates(s, w)
@@ -675,8 +694,10 @@ async def add_workout(
                 raise HTTPException(409, detail=f"Possible duplicate. Existing IDs: {dups}. Use force=true to save anyway.")
         obj = Workout(**w.model_dump())
         s.add(obj)
+        await s.flush()
+        result = _row_to_out(obj)
         await s.commit()
-    return GenericResponse(message="Workout saved")
+    return result
 
 
 @app.post("/workouts/bulk", response_model=BulkWorkoutOut)
@@ -738,6 +759,7 @@ async def query_workouts(
     week: Optional[int] = None,
     day: Optional[int] = None, start: Optional[str] = None,
     end: Optional[str] = None, tag: Optional[str] = None,
+    limit: int = Query(200, ge=1, le=500, description="Max rows to return"),
 ) -> List[WorkoutOut]:
     stmt = select(Workout)
     if exercise: stmt = stmt.where(_safe_like(Workout.exercise, exercise))
@@ -747,7 +769,7 @@ async def query_workouts(
     if start: stmt = stmt.where(Workout.date >= start)
     if end: stmt = stmt.where(Workout.date <= end)
     if tag: stmt = stmt.where(_safe_like(Workout.tags, tag))
-    stmt = stmt.order_by(asc(Workout.date), asc(Workout.id))
+    stmt = stmt.order_by(asc(Workout.date), asc(Workout.id)).limit(limit)
     async with async_session() as s:
         result = await s.execute(stmt)
         rows = result.scalars().all()
@@ -868,13 +890,15 @@ async def delete_workout(workout_id: int = FPath(..., ge=1)) -> GenericResponse:
 # =============================================================================
 # ENDPOINTS — Metcons / Conditioning / Benchmarks
 # =============================================================================
-@app.post("/metcons", response_model=GenericResponse)
-async def add_metcon(m: MetconIn) -> GenericResponse:
+@app.post("/metcons", response_model=MetconOut)
+async def add_metcon(m: MetconIn) -> MetconOut:
     async with async_session() as s:
         obj = Metcon(**m.model_dump())
         s.add(obj)
+        await s.flush()
+        result = _metcon_to_out(obj)
         await s.commit()
-    return GenericResponse(message="Metcon saved")
+    return result
 
 
 @app.post("/metcons/bulk", response_model=BulkMetconOut)
@@ -919,6 +943,7 @@ async def query_metcons(
     week: Optional[int] = None, day: Optional[int] = None,
     start: Optional[str] = None, end: Optional[str] = None,
     tag: Optional[str] = None,
+    limit: int = Query(200, ge=1, le=500, description="Max rows to return"),
 ) -> List[MetconOut]:
     stmt = select(Metcon)
     if name: stmt = stmt.where(_safe_like(Metcon.name, name))
@@ -930,7 +955,7 @@ async def query_metcons(
     if start: stmt = stmt.where(Metcon.date >= start)
     if end: stmt = stmt.where(Metcon.date <= end)
     if tag: stmt = stmt.where(_safe_like(Metcon.tags, tag))
-    stmt = stmt.order_by(asc(Metcon.date), asc(Metcon.id))
+    stmt = stmt.order_by(asc(Metcon.date), asc(Metcon.id)).limit(limit)
     async with async_session() as s:
         result = await s.execute(stmt)
         rows = result.scalars().all()
@@ -1142,15 +1167,16 @@ async def analytics_consistency(cycle: Optional[int] = None) -> ConsistencyOut:
         stmt = select(Workout.cycle, Workout.week).group_by(Workout.cycle, Workout.week)
         if cycle is not None: stmt = stmt.where(Workout.cycle == cycle)
         weeks = (await s.execute(stmt)).all()
-        full: List[int] = []
+        completed: List[ConsistencyWeekOut] = []
         for cyc, wk in weeks:
             if cyc is None or wk is None: continue
             days = {d for (d,) in (await s.execute(
                 select(Workout.day).where(Workout.cycle == cyc, Workout.week == wk)
             )).all() if d is not None}
             if REQUIRED_DAYS.issubset(days):
-                full.append(int(wk))
-    return ConsistencyOut(weeks_completed_100=sorted(full))
+                completed.append(ConsistencyWeekOut(cycle=int(cyc), week=int(wk)))
+    completed.sort(key=lambda x: (x.cycle, x.week))
+    return ConsistencyOut(completed_weeks=completed, total=len(completed))
 
 
 @app.get("/analytics/estimated_1rm", response_model=OneRMOut)
