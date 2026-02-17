@@ -129,33 +129,37 @@ async def _init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     # Migrations for workout table
-    async with engine.begin() as conn:
-        for col_name, col_sql in [
-            ("set_number", "ALTER TABLE workout ADD COLUMN set_number INTEGER"),
-            ("tags", "ALTER TABLE workout ADD COLUMN tags VARCHAR"),
-            ("iso_week", "ALTER TABLE workout ADD COLUMN iso_week INTEGER"),
-        ]:
-            try:
+    # Each column uses its own transaction so a failed SELECT doesn't abort
+    # the ALTER TABLE in PostgreSQL (PG aborts entire txn on any error).
+    for col_name, col_sql in [
+        ("set_number", "ALTER TABLE workout ADD COLUMN set_number INTEGER"),
+        ("tags", "ALTER TABLE workout ADD COLUMN tags VARCHAR"),
+        ("iso_week", "ALTER TABLE workout ADD COLUMN iso_week INTEGER"),
+    ]:
+        try:
+            async with engine.begin() as conn:
                 await conn.execute(text(f"SELECT {col_name} FROM workout LIMIT 1"))
-            except Exception:
-                try:
+        except Exception:
+            try:
+                async with engine.begin() as conn:
                     await conn.execute(text(col_sql))
                     log.info(f"Added {col_name} column to workout table")
-                except Exception as e:
-                    log.warning(f"Migration for {col_name} (workout): {e}")
+            except Exception as e:
+                log.warning(f"Migration for {col_name} (workout): {e}")
     # Migrations for metcon table
-    async with engine.begin() as conn:
-        for col_name, col_sql in [
-            ("iso_week", "ALTER TABLE metcon ADD COLUMN iso_week INTEGER"),
-        ]:
-            try:
+    for col_name, col_sql in [
+        ("iso_week", "ALTER TABLE metcon ADD COLUMN iso_week INTEGER"),
+    ]:
+        try:
+            async with engine.begin() as conn:
                 await conn.execute(text(f"SELECT {col_name} FROM metcon LIMIT 1"))
-            except Exception:
-                try:
+        except Exception:
+            try:
+                async with engine.begin() as conn:
                     await conn.execute(text(col_sql))
                     log.info(f"Added {col_name} column to metcon table")
-                except Exception as e:
-                    log.warning(f"Migration for {col_name} (metcon): {e}")
+            except Exception as e:
+                log.warning(f"Migration for {col_name} (metcon): {e}")
 
 
 # -----------------------------------------------------------------------------
@@ -516,7 +520,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 app = FastAPI(
     title="CF-Log API",
     description="CrossFit Training Log & Analytics API. Strength sets + metcon/benchmark tracking.",
-    version="13.0.0",
+    version="14.0.0",
     lifespan=lifespan,
 )
 
@@ -646,7 +650,7 @@ async def health() -> HealthOut:
 
 @app.get("/", response_model=GenericResponse)
 async def root() -> GenericResponse:
-    return GenericResponse(message="CF-Log API v13 is running")
+    return GenericResponse(message="CF-Log API v14 is running")
 
 
 @app.get("/debug/dbinfo", response_model=DBInfoOut)
