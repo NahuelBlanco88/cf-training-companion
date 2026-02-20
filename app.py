@@ -13,6 +13,7 @@ import os
 import re
 import logging
 import time
+import traceback
 from collections import defaultdict
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -21,6 +22,7 @@ from typing import AsyncGenerator, Dict, List, Optional
 
 from fastapi import Body, FastAPI, HTTPException, Query, Request, Response
 from fastapi import Path as FPath
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import (
     Float,
@@ -52,7 +54,10 @@ _db_name = os.getenv("DB_NAME", "cf_log")
 if _cloud_sql:
     _socket_path = f"/cloudsql/{_cloud_sql}"
     DB_PATH = f"postgresql+asyncpg://{_db_user}:{_db_pass}@/{_db_name}?host={_socket_path}"
-    engine = create_async_engine(DB_PATH, echo=False, pool_pre_ping=True)
+    engine = create_async_engine(
+        DB_PATH, echo=False, pool_pre_ping=True,
+        pool_size=20, max_overflow=30, pool_timeout=30,
+    )
     log.info(f"Using Cloud SQL (async): {_cloud_sql}")
 else:
     env_db = os.getenv("CFLOG_DB")
@@ -520,9 +525,22 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 app = FastAPI(
     title="CF-Log API",
     description="CrossFit Training Log & Analytics API. Strength sets + metcon/benchmark tracking.",
-    version="14.1.0",
+    version="14.2.0",
     lifespan=lifespan,
 )
+
+
+# -----------------------------------------------------------------------------
+# Global exception handler — log full traceback so Cloud Run logs show the cause
+# -----------------------------------------------------------------------------
+@app.exception_handler(Exception)
+async def _global_exception_handler(request: Request, exc: Exception):
+    tb = traceback.format_exc()
+    log.error(f"Unhandled error on {request.method} {request.url.path}: {exc}\n{tb}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal server error: {type(exc).__name__}: {exc}"},
+    )
 
 
 # -----------------------------------------------------------------------------
@@ -565,14 +583,17 @@ async def rate_limit_middleware(request: Request, call_next):
 # -----------------------------------------------------------------------------
 # Helpers
 # -----------------------------------------------------------------------------
+_LIKE_ESCAPE_CHAR = "!"  # Use ! instead of \ to avoid PG backslash issues
+
+
 def _escape_like(s: str) -> str:
-    return s.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return s.replace("!", "!!").replace("%", "!%").replace("_", "!_")
 
 
 def _safe_like(column, term: str):
     escaped = _escape_like(term.strip().lower())
     pattern = f"%{escaped}%"
-    return func.lower(column).like(pattern, escape="\\")
+    return func.lower(column).like(pattern, escape=_LIKE_ESCAPE_CHAR)
 
 
 def _row_to_out(w: Workout) -> WorkoutOut:
@@ -650,7 +671,7 @@ async def health() -> HealthOut:
 
 @app.get("/", response_model=GenericResponse)
 async def root() -> GenericResponse:
-    return GenericResponse(message="CF-Log API v14.1 is running")
+    return GenericResponse(message="CF-Log API v14.2 is running")
 
 
 @app.get("/debug/dbinfo", response_model=DBInfoOut)
