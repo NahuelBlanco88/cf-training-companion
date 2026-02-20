@@ -1,0 +1,2524 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CF-Log API",
+    "description": "CrossFit Training Log & Analytics API v14.4.0.\n\nTracks strength working sets (one row per set) and conditioning/benchmark results (metcons).\nOrganized by training cycles (1-8) and weeks (1-4 per cycle, 32 total).\nSupports iso_week for ISO week numbering.\n\nKey rules:\n- Use /workouts/bulk to log multiple sets in one call (preferred over single POST)\n- After saving, call GET /workouts/verify to confirm data was stored correctly\n- Use /day_summary when the user asks about a specific training day (returns both workouts and metcons)\n- For the most recent set, use /workouts?exercise=X&limit=1 or /search_exercise\n- For the most recent metcon, use /metcons?name=X&limit=1\n- Exercise names are auto-normalized to Title Case\n- Tags are auto-normalized to lowercase\n- Dates must be YYYY-MM-DD format\n- iso_week is supported on both workouts and metcons for ISO week tracking",
+    "version": "14.4.0"
+  },
+  "servers": [
+    {
+      "url": "https://cf-training-companion-91594070242.us-central1.run.app"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "healthCheck",
+        "summary": "Health check \u2014 confirms the API is up and the database is connected. Use this to diagnose connectivity issues before logging data.",
+        "responses": {
+          "200": {
+            "description": "Health status including DB connection state and type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/day_summary": {
+      "get": {
+        "operationId": "daySummary",
+        "summary": "Get everything logged for a training day \u2014 both strength sets AND metcons in one call. Use this FIRST when the user asks about a specific day.",
+        "parameters": [
+          {
+            "name": "cycle",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "week",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "day",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Day summary with workouts and metcons",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DaySummaryOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workouts": {
+      "post": {
+        "operationId": "addWorkout",
+        "summary": "Log a single working set. Returns the saved workout with its ID. For multiple sets, prefer /workouts/bulk instead.",
+        "parameters": [
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "description": "Skip duplicate check \u2014 set to true to force save even if a duplicate is detected",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkoutIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Saved workout with assigned ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkoutOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Duplicate detected \u2014 use force=true to override"
+          },
+          "422": {
+            "description": "Validation error (bad date, empty exercise)"
+          }
+        }
+      },
+      "get": {
+        "operationId": "queryWorkouts",
+        "summary": "Query workouts with optional filters. Returns up to 'limit' rows (default 200). Use this for broad queries; use /workouts/search for fuzzy exercise name matching.",
+        "parameters": [
+          {
+            "name": "exercise",
+            "in": "query",
+            "required": false,
+            "description": "Filter by exercise name (partial match)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cycle",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "week",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "day",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "required": false,
+            "description": "Filter by tag",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Max rows (default 200, max 500)",
+            "schema": {
+              "type": "integer",
+              "default": 200,
+              "minimum": 1,
+              "maximum": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of workouts matching the filters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WorkoutOut"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workouts/bulk": {
+      "post": {
+        "operationId": "addWorkoutsBulk",
+        "summary": "PREFERRED: Log multiple working sets in one call. Send one WorkoutIn per set. Always call /workouts/verify after to confirm data was saved correctly.",
+        "parameters": [
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "description": "Skip duplicate check \u2014 set to true to force save even if duplicates are detected",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkWorkoutIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk save result with count and IDs of saved rows",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkWorkoutOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Empty workout list"
+          },
+          "409": {
+            "description": "Duplicates detected \u2014 use force=true to override"
+          }
+        }
+      }
+    },
+    "/workouts/verify": {
+      "get": {
+        "operationId": "verifyWorkoutsGet",
+        "summary": "Verify saved workout data via GET \u2014 checks that the expected number of sets were stored for a given date. Use this after saving to confirm data integrity. Accepts query parameters instead of a request body.",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "description": "YYYY-MM-DD \u2014 the date to verify",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exercise",
+            "in": "query",
+            "required": false,
+            "description": "Exercise name to filter verification",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expected_sets",
+            "in": "query",
+            "required": false,
+            "description": "Expected number of sets \u2014 if provided, match will be true only if actual equals expected",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "cycle",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "week",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "day",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Verification result with match status and all logged data for the date",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workouts/undo_last": {
+      "delete": {
+        "operationId": "undoLast",
+        "summary": "Delete the N most recently added workout rows. Use to undo a mistaken bulk insert or correct a data entry error.",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "required": true,
+            "description": "Number of most recent rows to delete (max 50)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Undo result with deleted IDs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UndoOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No workouts to undo"
+          }
+        }
+      }
+    },
+    "/workouts/{workout_id}": {
+      "put": {
+        "operationId": "editWorkout",
+        "summary": "Edit an existing workout by ID. Send the full updated workout data \u2014 all fields will be overwritten. Use this to correct mistakes in a previously logged set.",
+        "parameters": [
+          {
+            "name": "workout_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkoutIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated workout",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkoutOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Workout not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteWorkout",
+        "summary": "Delete a specific workout by ID. Use this to remove a single incorrectly logged set when you know its ID.",
+        "parameters": [
+          {
+            "name": "workout_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Workout not found"
+          }
+        }
+      }
+    },
+    "/search_exercise": {
+      "get": {
+        "operationId": "searchExercise",
+        "summary": "Search for an exercise by name and return all matching logged sets. Use this when the user asks to look up a specific exercise with optional cycle/week/day/tag filters.",
+        "parameters": [
+          {
+            "name": "exercise",
+            "in": "query",
+            "required": true,
+            "description": "Exercise name (partial match)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cycle",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "week",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "day",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "required": false,
+            "description": "Filter by tag",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exercise name and all matching logged sets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchExerciseOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metcons": {
+      "post": {
+        "operationId": "addMetcon",
+        "summary": "Log a conditioning workout / benchmark result. Returns the saved metcon with its ID. Set score fields based on workout_type: score_time_seconds for timed WODs, score_rounds + score_reps for AMRAP.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetconIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Saved metcon with assigned ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetconOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error (bad date, invalid workout_type, invalid rx)"
+          }
+        }
+      },
+      "get": {
+        "operationId": "queryMetcons",
+        "summary": "Query metcons with optional filters. Returns up to 'limit' rows (default 200). Use this for broad metcon queries with multiple filter options.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "description": "Metcon name (partial match)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workout_type",
+            "in": "query",
+            "required": false,
+            "description": "for_time, amrap, emom, chipper, interval, other",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rx",
+            "in": "query",
+            "required": false,
+            "description": "rx, scaled, rx_plus",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cycle",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "week",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "day",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "required": false,
+            "description": "Filter by tag",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Max rows (default 200, max 500)",
+            "schema": {
+              "type": "integer",
+              "default": 200,
+              "minimum": 1,
+              "maximum": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of metcons matching the filters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MetconOut"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metcons/bulk": {
+      "post": {
+        "operationId": "addMetconsBulk",
+        "summary": "Log multiple metcon results in one call. Use this when the user provides several conditioning workout results at once.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkMetconIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk save result with count and IDs of saved metcons",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkMetconOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Empty metcon list"
+          }
+        }
+      }
+    },
+    "/metcons/search": {
+      "get": {
+        "operationId": "searchMetcons",
+        "summary": "Search metcons by name with optional filters. Use when the user asks about a conditioning workout by name (e.g. 'How did I do on Fran?').",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Metcon name or part of it",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "workout_type",
+            "in": "query",
+            "required": false,
+            "description": "for_time, amrap, emom, chipper, interval, other",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rx",
+            "in": "query",
+            "required": false,
+            "description": "rx, scaled, rx_plus",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "required": false,
+            "description": "Filter by tag",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching metcons (max 500)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MetconOut"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metcons/{metcon_id}": {
+      "put": {
+        "operationId": "editMetcon",
+        "summary": "Edit an existing metcon result by ID. Send the full updated metcon data \u2014 all fields will be overwritten. Use this to correct a previously logged conditioning result.",
+        "parameters": [
+          {
+            "name": "metcon_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetconIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated metcon",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetconOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Metcon not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteMetcon",
+        "summary": "Delete a metcon result by ID. Use this to remove an incorrectly logged conditioning workout.",
+        "parameters": [
+          {
+            "name": "metcon_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Metcon not found"
+          }
+        }
+      }
+    },
+    "/stats": {
+      "get": {
+        "operationId": "stats",
+        "summary": "Overall stats: total workout sets, total metcons, best value per exercise, and the last workout logged. Use this for a quick overview of the entire training log.",
+        "responses": {
+          "200": {
+            "description": "Stats overview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatsOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/prs": {
+      "get": {
+        "operationId": "analyticsPRs",
+        "summary": "Personal records \u2014 highest value logged per exercise. Use to answer 'what is my PR for X?' or to list all PRs across all exercises.",
+        "parameters": [
+          {
+            "name": "exercise",
+            "in": "query",
+            "required": false,
+            "description": "Filter to one exercise (exact match, case-insensitive). Omit to get all PRs.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PRs map (exercise name -> best value)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PRsOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/estimated_1rm": {
+      "get": {
+        "operationId": "analyticsEstimated1RM",
+        "summary": "Estimate 1RM from logged sets using Epley or Brzycki formula. Uses the set that produces the highest estimate. Use to answer 'what is my estimated one-rep max for X?'",
+        "parameters": [
+          {
+            "name": "exercise",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "formula",
+            "in": "query",
+            "required": false,
+            "description": "epley (default) or brzycki",
+            "schema": {
+              "type": "string",
+              "default": "epley",
+              "enum": [
+                "epley",
+                "brzycki"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estimated 1RM with source data (weight and reps used in calculation)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OneRMOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/volume": {
+      "get": {
+        "operationId": "analyticsVolume",
+        "summary": "Training volume per exercise (sets x reps x weight). Filter by cycle/week or date range. Use to assess total load and compare volume across exercises or time periods.",
+        "parameters": [
+          {
+            "name": "cycle",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "week",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Volume breakdown per exercise with grand totals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeeklyVolumeOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/timeline": {
+      "get": {
+        "operationId": "analyticsTimeline",
+        "summary": "Exercise history \u2014 best value per date. Use to show strength progression over time and visualize trends for a specific exercise.",
+        "parameters": [
+          {
+            "name": "exercise",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Timeline data points sorted by date",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExerciseTimelineOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/metcon_prs": {
+      "get": {
+        "operationId": "metconPRs",
+        "summary": "Best scores for benchmarks. For timed WODs = fastest time, for AMRAP = most rounds+reps. Use to answer 'what is my best Fran time?' or 'show all my benchmark PRs'.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "description": "Filter by metcon name (partial match). Omit for all benchmarks.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rx",
+            "in": "query",
+            "required": false,
+            "description": "Filter by rx status (rx, scaled, rx_plus)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Benchmark PRs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BenchmarkListOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/metcon_timeline": {
+      "get": {
+        "operationId": "metconTimeline",
+        "summary": "History of a named metcon over time \u2014 use to track benchmark progress, show improvement, and visualize conditioning performance trends.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "description": "Metcon name",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "rx",
+            "in": "query",
+            "required": false,
+            "description": "rx, scaled, rx_plus",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Metcon timeline data with all attempts in chronological order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetconTimelineOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/movement_frequency": {
+      "get": {
+        "operationId": "analyticsMovementFrequency",
+        "summary": "How often each exercise appears in training \u2014 shows session count, total sets, and first/last date. Use to assess training variety, identify neglected movements, or check exercise selection balance.",
+        "parameters": [
+          {
+            "name": "cycle",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "week",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Max results (default 50, max 200)",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Movement frequency data with exercise list and totals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovementFrequencyOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/intensity_distribution": {
+      "get": {
+        "operationId": "analyticsIntensityDistribution",
+        "summary": "Break down sets by rep bracket: heavy (1-3 reps), strength (4-6), hypertrophy (7-12), endurance (13+). Use to analyze training style and assess if rep ranges match the user's goals.",
+        "parameters": [
+          {
+            "name": "exercise",
+            "in": "query",
+            "required": true,
+            "description": "Exercise name (exact match, case-insensitive)",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "cycle",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "week",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Intensity distribution with brackets and set/rep counts per bracket",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntensityDistributionOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/week_over_week": {
+      "get": {
+        "operationId": "analyticsWeekOverWeek",
+        "summary": "Per-week metrics for an exercise across weeks \u2014 best value, average, total sets, total reps, total volume per week. Use to assess progression, stability, or stalls across training weeks.",
+        "parameters": [
+          {
+            "name": "exercise",
+            "in": "query",
+            "required": true,
+            "description": "Exercise name (exact match, case-insensitive)",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "cycle",
+            "in": "query",
+            "required": false,
+            "description": "Filter to a specific cycle. Omit for all cycles.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Week-over-week metrics for the exercise",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeekOverWeekOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/training_density": {
+      "get": {
+        "operationId": "analyticsTrainingDensity",
+        "summary": "Sets and volume per training day \u2014 shows how much work is done each session. Use to assess fatigue accumulation, session load distribution, and identify overloaded training days.",
+        "parameters": [
+          {
+            "name": "cycle",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "week",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Training density per day with averages and total training days",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingDensityOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/trend": {
+      "get": {
+        "operationId": "analyticsTrend",
+        "summary": "Trend direction and slope for an exercise \u2014 uses best value per session with linear regression. Use to determine if performance is increasing, decreasing, or stable over time.",
+        "parameters": [
+          {
+            "name": "exercise",
+            "in": "query",
+            "required": true,
+            "description": "Exercise name (exact match, case-insensitive)",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trend analysis with slope, direction, recent average, and overall average",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrendOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/export/csv": {
+      "get": {
+        "operationId": "exportCsv",
+        "summary": "Export all workout (strength set) data as CSV text. Use this when the user wants to download or back up their workout data. Includes iso_week column.",
+        "responses": {
+          "200": {
+            "description": "CSV export with row count and CSV text content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CsvExportOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/export/metcons_csv": {
+      "get": {
+        "operationId": "exportMetconsCsv",
+        "summary": "Export all metcon/conditioning data as CSV text. Use this when the user wants to download or back up their metcon data. Includes iso_week column.",
+        "responses": {
+          "200": {
+            "description": "CSV export with row count and CSV text content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CsvExportOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GenericResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "HealthOut": {
+        "type": "object",
+        "description": "Health check response showing API and database status",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "True if the API and DB are healthy"
+          },
+          "db_connected": {
+            "type": "boolean",
+            "description": "True if the database is reachable"
+          },
+          "db_type": {
+            "type": "string",
+            "description": "Database type (e.g. 'Cloud SQL PostgreSQL' or 'SQLite')"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "UTC ISO timestamp of the health check"
+          }
+        },
+        "required": [
+          "ok",
+          "db_connected",
+          "db_type",
+          "timestamp"
+        ]
+      },
+      "DaySummaryOut": {
+        "type": "object",
+        "description": "Everything logged for a specific cycle/week/day \u2014 both workouts and metcons combined",
+        "properties": {
+          "cycle": {
+            "type": "integer"
+          },
+          "week": {
+            "type": "integer"
+          },
+          "day": {
+            "type": "integer"
+          },
+          "workouts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutOut"
+            }
+          },
+          "metcons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetconOut"
+            }
+          },
+          "total_workout_sets": {
+            "type": "integer",
+            "description": "Number of strength sets logged"
+          },
+          "total_metcons": {
+            "type": "integer",
+            "description": "Number of metcon results logged"
+          }
+        },
+        "required": [
+          "cycle",
+          "week",
+          "day",
+          "workouts",
+          "metcons",
+          "total_workout_sets",
+          "total_metcons"
+        ]
+      },
+      "WorkoutIn": {
+        "type": "object",
+        "description": "One working set. Send one of these per set performed. Exercise names are auto-normalized to Title Case. Tags are auto-normalized to lowercase.",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "YYYY-MM-DD format, must be a valid calendar date"
+          },
+          "exercise": {
+            "type": "string",
+            "description": "Exercise name (auto-normalized to Title Case)"
+          },
+          "set_number": {
+            "type": "integer",
+            "description": "Which working set (1, 2, 3...). Required for duplicate detection."
+          },
+          "reps": {
+            "type": "integer",
+            "description": "Exact rep count this set"
+          },
+          "value": {
+            "type": "number",
+            "description": "Weight in kg, time in sec, or calories"
+          },
+          "unit": {
+            "type": "string",
+            "description": "kg, lbs, sec, cal, m, min"
+          },
+          "cycle": {
+            "type": "integer",
+            "description": "Training cycle number (1-8)"
+          },
+          "week": {
+            "type": "integer",
+            "description": "Week within cycle (1-4)"
+          },
+          "iso_week": {
+            "type": "integer",
+            "description": "ISO week number (1-53) for ISO week-based tracking"
+          },
+          "day": {
+            "type": "integer",
+            "description": "Training day number (1-7)"
+          },
+          "notes": {
+            "type": "string",
+            "default": ""
+          },
+          "tags": {
+            "type": "string",
+            "description": "Comma-separated tags (auto-normalized to lowercase)"
+          }
+        },
+        "required": [
+          "date",
+          "exercise"
+        ]
+      },
+      "WorkoutOut": {
+        "type": "object",
+        "description": "A saved workout set with its database ID and all fields",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "date": {
+            "type": "string"
+          },
+          "exercise": {
+            "type": "string"
+          },
+          "set_number": {
+            "type": "integer"
+          },
+          "reps": {
+            "type": "integer"
+          },
+          "value": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "cycle": {
+            "type": "integer"
+          },
+          "week": {
+            "type": "integer"
+          },
+          "iso_week": {
+            "type": "integer",
+            "description": "ISO week number (1-53)"
+          },
+          "day": {
+            "type": "integer"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "exercise"
+        ]
+      },
+      "BulkWorkoutIn": {
+        "type": "object",
+        "description": "Wrapper for bulk workout insertion \u2014 contains an array of WorkoutIn objects",
+        "properties": {
+          "workouts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutIn"
+            }
+          }
+        },
+        "required": [
+          "workouts"
+        ]
+      },
+      "BulkWorkoutOut": {
+        "type": "object",
+        "description": "Result of a bulk workout insertion",
+        "properties": {
+          "saved": {
+            "type": "integer",
+            "description": "Number of sets saved"
+          },
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "Database IDs of saved rows"
+          }
+        },
+        "required": [
+          "saved",
+          "ids"
+        ]
+      },
+      "MetconIn": {
+        "type": "object",
+        "description": "A conditioning/benchmark workout result. Set score fields based on workout_type: score_time_seconds for timed WODs, score_rounds + score_reps for AMRAP. Metcon name is auto-normalized to Title Case.",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "YYYY-MM-DD format"
+          },
+          "name": {
+            "type": "string",
+            "description": "Metcon name (auto-normalized to Title Case). E.g. 'Fran', 'Murph'"
+          },
+          "workout_type": {
+            "type": "string",
+            "description": "Type of workout",
+            "enum": [
+              "for_time",
+              "amrap",
+              "emom",
+              "chipper",
+              "interval",
+              "other"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "The prescription, e.g. '21-15-9 Thrusters & Pull-ups'"
+          },
+          "score_time_seconds": {
+            "type": "integer",
+            "description": "Total time in seconds (for for_time WODs)"
+          },
+          "score_rounds": {
+            "type": "integer",
+            "description": "Completed rounds (for AMRAP)"
+          },
+          "score_reps": {
+            "type": "integer",
+            "description": "Extra reps beyond last full round (for AMRAP)"
+          },
+          "score_display": {
+            "type": "string",
+            "description": "Human-readable score: '3:45', '12+8', '185 reps'"
+          },
+          "rx": {
+            "type": "string",
+            "description": "Prescription level",
+            "enum": [
+              "rx",
+              "scaled",
+              "rx_plus"
+            ]
+          },
+          "time_cap_seconds": {
+            "type": "integer",
+            "description": "Time cap in seconds"
+          },
+          "cycle": {
+            "type": "integer",
+            "description": "Training cycle number (1-8)"
+          },
+          "week": {
+            "type": "integer",
+            "description": "Week within cycle (1-4)"
+          },
+          "iso_week": {
+            "type": "integer",
+            "description": "ISO week number (1-53) for ISO week-based tracking"
+          },
+          "day": {
+            "type": "integer",
+            "description": "Training day number (1-7)"
+          },
+          "notes": {
+            "type": "string",
+            "default": ""
+          },
+          "tags": {
+            "type": "string",
+            "description": "Comma-separated tags (auto-normalized to lowercase)"
+          }
+        },
+        "required": [
+          "date",
+          "name",
+          "workout_type"
+        ]
+      },
+      "MetconOut": {
+        "type": "object",
+        "description": "A saved metcon result with its database ID and all fields",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "date": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "workout_type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "score_time_seconds": {
+            "type": "integer"
+          },
+          "score_rounds": {
+            "type": "integer"
+          },
+          "score_reps": {
+            "type": "integer"
+          },
+          "score_display": {
+            "type": "string"
+          },
+          "rx": {
+            "type": "string"
+          },
+          "time_cap_seconds": {
+            "type": "integer"
+          },
+          "cycle": {
+            "type": "integer"
+          },
+          "week": {
+            "type": "integer"
+          },
+          "iso_week": {
+            "type": "integer",
+            "description": "ISO week number (1-53)"
+          },
+          "day": {
+            "type": "integer"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "name",
+          "workout_type"
+        ]
+      },
+      "BulkMetconIn": {
+        "type": "object",
+        "description": "Wrapper for bulk metcon insertion \u2014 contains an array of MetconIn objects",
+        "properties": {
+          "metcons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetconIn"
+            }
+          }
+        },
+        "required": [
+          "metcons"
+        ]
+      },
+      "BulkMetconOut": {
+        "type": "object",
+        "description": "Result of a bulk metcon insertion",
+        "properties": {
+          "saved": {
+            "type": "integer",
+            "description": "Number of metcons saved"
+          },
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "Database IDs of saved metcon rows"
+          }
+        },
+        "required": [
+          "saved",
+          "ids"
+        ]
+      },
+      "VerifyOut": {
+        "type": "object",
+        "description": "Verification result \u2014 confirms whether the expected number of sets match what is actually stored",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "exercise": {
+            "type": "string"
+          },
+          "expected_sets": {
+            "type": "integer"
+          },
+          "actual_sets": {
+            "type": "integer"
+          },
+          "match": {
+            "type": "boolean",
+            "description": "true if expected_sets == actual_sets (or actual > 0 if expected not given)"
+          },
+          "logged": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutOut"
+            },
+            "description": "All logged sets matching the verification criteria"
+          }
+        },
+        "required": [
+          "date",
+          "actual_sets",
+          "match",
+          "logged"
+        ]
+      },
+      "UndoOut": {
+        "type": "object",
+        "description": "Result of an undo operation \u2014 lists the IDs that were deleted",
+        "properties": {
+          "deleted": {
+            "type": "integer",
+            "description": "Number of rows deleted"
+          },
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "Database IDs of deleted rows"
+          }
+        },
+        "required": [
+          "deleted",
+          "ids"
+        ]
+      },
+      "SearchExerciseOut": {
+        "type": "object",
+        "description": "Search result for an exercise \u2014 includes the search term and all matching logged sets",
+        "properties": {
+          "exercise": {
+            "type": "string",
+            "description": "The exercise name that was searched"
+          },
+          "logged": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutOut"
+            },
+            "description": "All matching logged workout sets"
+          }
+        },
+        "required": [
+          "exercise",
+          "logged"
+        ]
+      },
+      "MetconPROut": {
+        "type": "object",
+        "description": "Best score for a named benchmark",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "workout_type": {
+            "type": "string"
+          },
+          "best_time_seconds": {
+            "type": "integer",
+            "description": "Fastest time in seconds (for timed WODs)"
+          },
+          "best_time_display": {
+            "type": "string",
+            "description": "Human-readable fastest time (e.g. '4:05')"
+          },
+          "best_rounds": {
+            "type": "integer",
+            "description": "Best rounds (for AMRAP)"
+          },
+          "best_reps": {
+            "type": "integer",
+            "description": "Extra reps in best AMRAP attempt"
+          },
+          "best_score_display": {
+            "type": "string",
+            "description": "Human-readable best score"
+          },
+          "rx": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "description": "Date of the PR"
+          },
+          "metcon_id": {
+            "type": "integer",
+            "description": "Database ID of the PR metcon row"
+          }
+        },
+        "required": [
+          "name",
+          "workout_type"
+        ]
+      },
+      "MetconTimelinePointOut": {
+        "type": "object",
+        "description": "A single data point in a metcon timeline",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "score_time_seconds": {
+            "type": "integer"
+          },
+          "score_rounds": {
+            "type": "integer"
+          },
+          "score_reps": {
+            "type": "integer"
+          },
+          "score_display": {
+            "type": "string"
+          },
+          "rx": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "date"
+        ]
+      },
+      "MetconTimelineOut": {
+        "type": "object",
+        "description": "Timeline of all attempts for a named metcon, sorted chronologically",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "workout_type": {
+            "type": "string"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetconTimelinePointOut"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "timeline"
+        ]
+      },
+      "BenchmarkListOut": {
+        "type": "object",
+        "description": "List of benchmark PRs",
+        "properties": {
+          "benchmarks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetconPROut"
+            }
+          }
+        },
+        "required": [
+          "benchmarks"
+        ]
+      },
+      "StatsOut": {
+        "type": "object",
+        "description": "Overall training stats \u2014 totals and bests",
+        "properties": {
+          "total_sessions": {
+            "type": "integer",
+            "description": "Total workout sets logged"
+          },
+          "total_metcons": {
+            "type": "integer",
+            "description": "Total metcon results logged"
+          },
+          "bests": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Best value per exercise (exercise name -> highest value)"
+          },
+          "last": {
+            "$ref": "#/components/schemas/WorkoutOut"
+          }
+        },
+        "required": [
+          "total_sessions",
+          "total_metcons",
+          "bests"
+        ]
+      },
+      "PRsOut": {
+        "type": "object",
+        "description": "Personal records map",
+        "properties": {
+          "prs": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Exercise name -> highest value logged"
+          }
+        },
+        "required": [
+          "prs"
+        ]
+      },
+      "OneRMOut": {
+        "type": "object",
+        "description": "Estimated one-rep max result",
+        "properties": {
+          "exercise": {
+            "type": "string"
+          },
+          "estimated_1rm_kg": {
+            "type": "number",
+            "description": "Estimated one-rep max"
+          },
+          "based_on_value": {
+            "type": "number",
+            "description": "Weight used in calculation"
+          },
+          "based_on_reps": {
+            "type": "integer",
+            "description": "Reps used in calculation"
+          },
+          "formula": {
+            "type": "string",
+            "description": "epley or brzycki"
+          }
+        },
+        "required": [
+          "exercise",
+          "formula"
+        ]
+      },
+      "VolumeOut": {
+        "type": "object",
+        "description": "Volume data for a single exercise",
+        "properties": {
+          "exercise": {
+            "type": "string"
+          },
+          "total_volume": {
+            "type": "number",
+            "description": "Sum of (value x reps) across all sets"
+          },
+          "total_sets": {
+            "type": "integer"
+          },
+          "total_reps": {
+            "type": "integer"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "exercise",
+          "total_volume",
+          "total_sets",
+          "total_reps"
+        ]
+      },
+      "WeeklyVolumeOut": {
+        "type": "object",
+        "description": "Volume breakdown per exercise with grand totals",
+        "properties": {
+          "cycle": {
+            "type": "integer"
+          },
+          "week": {
+            "type": "integer"
+          },
+          "exercises": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VolumeOut"
+            }
+          },
+          "grand_total_volume": {
+            "type": "number"
+          },
+          "grand_total_sets": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "exercises",
+          "grand_total_volume",
+          "grand_total_sets"
+        ]
+      },
+      "TimelinePointOut": {
+        "type": "object",
+        "description": "A single data point in an exercise timeline",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "best_value": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "total_sets": {
+            "type": "integer"
+          },
+          "total_reps": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "best_value",
+          "total_sets",
+          "total_reps"
+        ]
+      },
+      "ExerciseTimelineOut": {
+        "type": "object",
+        "description": "Exercise history \u2014 best value per date with set and rep counts",
+        "properties": {
+          "exercise": {
+            "type": "string"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinePointOut"
+            }
+          }
+        },
+        "required": [
+          "exercise",
+          "timeline"
+        ]
+      },
+      "MovementFrequencyItemOut": {
+        "type": "object",
+        "description": "Frequency data for a single exercise",
+        "properties": {
+          "exercise": {
+            "type": "string",
+            "description": "Exercise name"
+          },
+          "session_count": {
+            "type": "integer",
+            "description": "Number of distinct training days this exercise appears"
+          },
+          "total_sets": {
+            "type": "integer",
+            "description": "Total number of sets logged for this exercise"
+          },
+          "first_date": {
+            "type": "string",
+            "description": "First date this exercise was logged (YYYY-MM-DD)"
+          },
+          "last_date": {
+            "type": "string",
+            "description": "Most recent date this exercise was logged (YYYY-MM-DD)"
+          }
+        },
+        "required": [
+          "exercise",
+          "session_count",
+          "total_sets",
+          "first_date",
+          "last_date"
+        ]
+      },
+      "MovementFrequencyOut": {
+        "type": "object",
+        "description": "Movement frequency analysis \u2014 how often each exercise appears in training",
+        "properties": {
+          "exercises": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MovementFrequencyItemOut"
+            },
+            "description": "Exercises sorted by total sets descending"
+          },
+          "total_unique_exercises": {
+            "type": "integer",
+            "description": "Total number of unique exercises in the result"
+          },
+          "period_start": {
+            "type": "string",
+            "description": "Start date filter applied (YYYY-MM-DD) or null"
+          },
+          "period_end": {
+            "type": "string",
+            "description": "End date filter applied (YYYY-MM-DD) or null"
+          }
+        },
+        "required": [
+          "exercises",
+          "total_unique_exercises"
+        ]
+      },
+      "IntensityBracketOut": {
+        "type": "object",
+        "description": "A single intensity bracket (e.g. heavy, strength, hypertrophy, endurance)",
+        "properties": {
+          "bracket": {
+            "type": "string",
+            "description": "Bracket name: heavy, strength, hypertrophy, or endurance"
+          },
+          "rep_range": {
+            "type": "string",
+            "description": "Rep range for this bracket (e.g. '1-3', '4-6', '7-12', '13+')"
+          },
+          "sets": {
+            "type": "integer",
+            "description": "Number of sets in this bracket"
+          },
+          "total_reps": {
+            "type": "integer",
+            "description": "Total reps in this bracket"
+          },
+          "avg_value": {
+            "type": "number",
+            "description": "Average weight/value in this bracket"
+          },
+          "max_value": {
+            "type": "number",
+            "description": "Max weight/value in this bracket"
+          }
+        },
+        "required": [
+          "bracket",
+          "rep_range",
+          "sets",
+          "total_reps"
+        ]
+      },
+      "IntensityDistributionOut": {
+        "type": "object",
+        "description": "Breakdown of sets by rep-based intensity brackets",
+        "properties": {
+          "exercise": {
+            "type": "string"
+          },
+          "brackets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IntensityBracketOut"
+            },
+            "description": "Only brackets with at least one set are included"
+          },
+          "total_sets": {
+            "type": "integer",
+            "description": "Total sets across all brackets"
+          }
+        },
+        "required": [
+          "exercise",
+          "brackets",
+          "total_sets"
+        ]
+      },
+      "WeekMetricsOut": {
+        "type": "object",
+        "description": "Metrics for a single week of an exercise",
+        "properties": {
+          "cycle": {
+            "type": "integer"
+          },
+          "week": {
+            "type": "integer"
+          },
+          "best_value": {
+            "type": "number",
+            "description": "Highest value logged this week"
+          },
+          "avg_value": {
+            "type": "number",
+            "description": "Average value across all sets this week"
+          },
+          "total_sets": {
+            "type": "integer",
+            "description": "Number of sets logged this week"
+          },
+          "total_reps": {
+            "type": "integer",
+            "description": "Total reps logged this week"
+          },
+          "total_volume": {
+            "type": "number",
+            "description": "Total volume (value x reps) this week"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cycle",
+          "week",
+          "total_sets",
+          "total_reps",
+          "total_volume"
+        ]
+      },
+      "WeekOverWeekOut": {
+        "type": "object",
+        "description": "Week-over-week metrics for an exercise across multiple training weeks",
+        "properties": {
+          "exercise": {
+            "type": "string"
+          },
+          "weeks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WeekMetricsOut"
+            },
+            "description": "Metrics per week, sorted by cycle then week"
+          }
+        },
+        "required": [
+          "exercise",
+          "weeks"
+        ]
+      },
+      "DayDensityOut": {
+        "type": "object",
+        "description": "Training density data for a single day",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Training date (YYYY-MM-DD)"
+          },
+          "total_sets": {
+            "type": "integer",
+            "description": "Total sets performed this day"
+          },
+          "total_exercises": {
+            "type": "integer",
+            "description": "Number of unique exercises this day"
+          },
+          "total_volume": {
+            "type": "number",
+            "description": "Total volume (value x reps) this day"
+          },
+          "exercises": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of exercise names performed this day (sorted alphabetically)"
+          }
+        },
+        "required": [
+          "date",
+          "total_sets",
+          "total_exercises",
+          "total_volume",
+          "exercises"
+        ]
+      },
+      "TrainingDensityOut": {
+        "type": "object",
+        "description": "Training density analysis \u2014 sets and volume per day with averages",
+        "properties": {
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayDensityOut"
+            },
+            "description": "Per-day density data sorted by date"
+          },
+          "avg_sets_per_day": {
+            "type": "number",
+            "description": "Average sets per training day"
+          },
+          "avg_volume_per_day": {
+            "type": "number",
+            "description": "Average volume per training day"
+          },
+          "total_training_days": {
+            "type": "integer",
+            "description": "Total number of training days in the period"
+          }
+        },
+        "required": [
+          "days",
+          "avg_sets_per_day",
+          "avg_volume_per_day",
+          "total_training_days"
+        ]
+      },
+      "TrendOut": {
+        "type": "object",
+        "description": "Trend analysis for an exercise \u2014 linear regression on best values per session",
+        "properties": {
+          "exercise": {
+            "type": "string"
+          },
+          "data_points": {
+            "type": "integer",
+            "description": "Number of distinct training dates with data"
+          },
+          "slope_per_session": {
+            "type": "number",
+            "description": "Linear regression slope \u2014 positive means improving, negative means declining"
+          },
+          "direction": {
+            "type": "string",
+            "description": "Trend direction: 'increasing', 'decreasing', or 'stable' (stable if |slope| < 0.5)",
+            "enum": [
+              "increasing",
+              "decreasing",
+              "stable"
+            ]
+          },
+          "recent_avg": {
+            "type": "number",
+            "description": "Average of the 3 most recent session best values"
+          },
+          "overall_avg": {
+            "type": "number",
+            "description": "Average of all session best values"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "exercise",
+          "data_points"
+        ]
+      },
+      "CsvExportOut": {
+        "type": "object",
+        "description": "CSV export result \u2014 contains the filename, row count, and full CSV text",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "description": "Suggested filename for the export"
+          },
+          "rows": {
+            "type": "integer",
+            "description": "Number of data rows in the CSV"
+          },
+          "csv": {
+            "type": "string",
+            "description": "Full CSV content as a string (includes header row)"
+          }
+        },
+        "required": [
+          "filename",
+          "rows",
+          "csv"
+        ]
+      }
+    }
+  }
+}
