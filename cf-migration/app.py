@@ -690,7 +690,7 @@ async def health() -> HealthOut:
 
 @app.get("/", response_model=GenericResponse)
 async def root() -> GenericResponse:
-    return GenericResponse(message="CF-Log API v14.2 is running")
+    return GenericResponse(message="CF-Log API v14.3 is running")
 
 
 @app.get("/debug/dbinfo", response_model=DBInfoOut)
