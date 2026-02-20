@@ -520,7 +520,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 app = FastAPI(
     title="CF-Log API",
     description="CrossFit Training Log & Analytics API. Strength sets + metcon/benchmark tracking.",
-    version="14.0.0",
+    version="14.1.0",
     lifespan=lifespan,
 )
 
@@ -529,7 +529,7 @@ app = FastAPI(
 # Rate limiting middleware
 # -----------------------------------------------------------------------------
 _rate_limit_store: Dict[str, List[float]] = defaultdict(list)
-RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "60"))
+RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "300"))
 RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))
 
 
@@ -650,7 +650,7 @@ async def health() -> HealthOut:
 
 @app.get("/", response_model=GenericResponse)
 async def root() -> GenericResponse:
-    return GenericResponse(message="CF-Log API v14 is running")
+    return GenericResponse(message="CF-Log API v14.1 is running")
 
 
 @app.get("/debug/dbinfo", response_model=DBInfoOut)
