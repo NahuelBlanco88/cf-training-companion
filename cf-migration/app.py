@@ -2,7 +2,7 @@
 # =============================================================================
 # CF-Log API — Workouts & Analytics (FastAPI + SQLAlchemy 2.x async, Pydantic v2)
 # Results-only: no plan storage. One row per working set for maximum precision.
-# v13.0.0 — returns IDs on create, query limits, consistency fix, GPT-optimized
+# v14.3.0 — advanced analytics, iso_week support, schema alignment
 # =============================================================================
 
 from __future__ import annotations
@@ -226,6 +226,7 @@ class WorkoutIn(BaseModel):
     unit: Optional[str] = None
     cycle: Optional[int] = None
     week: Optional[int] = None
+    iso_week: Optional[int] = None
     day: Optional[int] = None
     notes: Optional[str] = ""
     tags: Optional[str] = None
@@ -259,6 +260,7 @@ class WorkoutOut(BaseModel):
     unit: Optional[str] = None
     cycle: Optional[int] = None
     week: Optional[int] = None
+    iso_week: Optional[int] = None
     day: Optional[int] = None
     notes: Optional[str] = ""
     tags: Optional[str] = None
@@ -290,6 +292,7 @@ class MetconIn(BaseModel):
     time_cap_seconds: Optional[int] = None
     cycle: Optional[int] = None
     week: Optional[int] = None
+    iso_week: Optional[int] = None
     day: Optional[int] = None
     notes: Optional[str] = ""
     tags: Optional[str] = None
@@ -345,6 +348,7 @@ class MetconOut(BaseModel):
     time_cap_seconds: Optional[int] = None
     cycle: Optional[int] = None
     week: Optional[int] = None
+    iso_week: Optional[int] = None
     day: Optional[int] = None
     notes: Optional[str] = ""
     tags: Optional[str] = None
@@ -450,6 +454,79 @@ class CsvExportOut(BaseModel):
     csv: str
 
 
+# ── Advanced Analytics schemas ────────────────────────────────────────────
+
+class MovementFrequencyItemOut(BaseModel):
+    exercise: str
+    session_count: int
+    total_sets: int
+    first_date: str
+    last_date: str
+
+
+class MovementFrequencyOut(BaseModel):
+    exercises: List[MovementFrequencyItemOut] = Field(default_factory=list)
+    total_unique_exercises: int = 0
+    period_start: Optional[str] = None
+    period_end: Optional[str] = None
+
+
+class IntensityBracketOut(BaseModel):
+    bracket: str
+    rep_range: str
+    sets: int
+    total_reps: int
+    avg_value: Optional[float] = None
+    max_value: Optional[float] = None
+
+
+class IntensityDistributionOut(BaseModel):
+    exercise: str
+    brackets: List[IntensityBracketOut] = Field(default_factory=list)
+    total_sets: int = 0
+
+
+class WeekMetricsOut(BaseModel):
+    cycle: int
+    week: int
+    best_value: Optional[float] = None
+    avg_value: Optional[float] = None
+    total_sets: int = 0
+    total_reps: int = 0
+    total_volume: float = 0.0
+    unit: Optional[str] = None
+
+
+class WeekOverWeekOut(BaseModel):
+    exercise: str
+    weeks: List[WeekMetricsOut] = Field(default_factory=list)
+
+
+class DayDensityOut(BaseModel):
+    date: str
+    total_sets: int
+    total_exercises: int
+    total_volume: float
+    exercises: List[str] = Field(default_factory=list)
+
+
+class TrainingDensityOut(BaseModel):
+    days: List[DayDensityOut] = Field(default_factory=list)
+    avg_sets_per_day: float = 0.0
+    avg_volume_per_day: float = 0.0
+    total_training_days: int = 0
+
+
+class TrendOut(BaseModel):
+    exercise: str
+    data_points: int = 0
+    slope_per_session: Optional[float] = None
+    direction: Optional[str] = None
+    recent_avg: Optional[float] = None
+    overall_avg: Optional[float] = None
+    unit: Optional[str] = None
+
+
 class OneRMOut(BaseModel):
     exercise: str
     estimated_1rm_kg: Optional[float] = None
@@ -539,7 +616,7 @@ async def _global_exception_handler(request: Request, exc: Exception):
     log.error(f"Unhandled error on {request.method} {request.url.path}: {exc}\n{tb}")
     return JSONResponse(
         status_code=500,
-        content={"detail": f"Internal server error: {type(exc).__name__}: {exc}"},
+        content={"detail": "Internal server error"},
     )
 
 
@@ -620,7 +697,7 @@ def _row_to_out(w: Workout) -> WorkoutOut:
         id=w.id, date=w.date, exercise=w.exercise, set_number=w.set_number,
         reps=_safe_int(w.reps),
         value=w.value, unit=w.unit, cycle=w.cycle, week=w.week,
-        day=w.day, notes=w.notes, tags=w.tags,
+        iso_week=w.iso_week, day=w.day, notes=w.notes, tags=w.tags,
     )
 
 
@@ -631,7 +708,7 @@ def _metcon_to_out(m: Metcon) -> MetconOut:
         score_rounds=m.score_rounds, score_reps=m.score_reps,
         score_display=m.score_display, rx=m.rx,
         time_cap_seconds=m.time_cap_seconds, cycle=m.cycle, week=m.week,
-        day=m.day, notes=m.notes, tags=m.tags,
+        iso_week=m.iso_week, day=m.day, notes=m.notes, tags=m.tags,
     )
 
 
@@ -647,6 +724,19 @@ def _db_type() -> str:
     if _cloud_sql:
         return f"Cloud SQL PostgreSQL ({_cloud_sql})"
     return "SQLite"
+
+
+def _linear_slope(ys: List[float]) -> Optional[float]:
+    """Simple linear regression slope over sequential indices."""
+    n = len(ys)
+    if n < 2:
+        return None
+    xs = list(range(n))
+    x_mean = sum(xs) / n
+    y_mean = sum(ys) / n
+    num = sum((x - x_mean) * (y - y_mean) for x, y in zip(xs, ys))
+    den = sum((x - x_mean) ** 2 for x in xs)
+    return num / den if den else 0.0
 
 
 # -----------------------------------------------------------------------------
@@ -690,7 +780,7 @@ async def health() -> HealthOut:
 
 @app.get("/", response_model=GenericResponse)
 async def root() -> GenericResponse:
-    return GenericResponse(message="CF-Log API v14.3 is running")
+    return GenericResponse(message="CF-Log API v14.3.0 is running")
 
 
 @app.get("/debug/dbinfo", response_model=DBInfoOut)
@@ -1300,6 +1390,219 @@ async def exercise_timeline(
     ])
 
 
+# =============================================================================
+# ENDPOINTS — Advanced Analytics
+# =============================================================================
+
+@app.get("/analytics/movement_frequency", response_model=MovementFrequencyOut)
+async def analytics_movement_frequency(
+    cycle: Optional[int] = None, week: Optional[int] = None,
+    start: Optional[str] = None, end: Optional[str] = None,
+    limit: int = Query(50, ge=1, le=200),
+) -> MovementFrequencyOut:
+    """How often each exercise appears — helps assess training variety and monotony."""
+    stmt = select(
+        Workout.exercise,
+        func.count(func.distinct(Workout.date)).label("sessions"),
+        func.count().label("sets"),
+        func.min(Workout.date).label("first_date"),
+        func.max(Workout.date).label("last_date"),
+    ).group_by(Workout.exercise)
+    if cycle is not None: stmt = stmt.where(Workout.cycle == cycle)
+    if week is not None: stmt = stmt.where(Workout.week == week)
+    if start: stmt = stmt.where(Workout.date >= start)
+    if end: stmt = stmt.where(Workout.date <= end)
+    stmt = stmt.order_by(desc(func.count())).limit(limit)
+    async with async_session() as s:
+        result = await s.execute(stmt)
+        rows = result.all()
+    items = [
+        MovementFrequencyItemOut(
+            exercise=e, session_count=int(sc), total_sets=int(ts),
+            first_date=fd, last_date=ld,
+        ) for e, sc, ts, fd, ld in rows
+    ]
+    return MovementFrequencyOut(
+        exercises=items, total_unique_exercises=len(items),
+        period_start=start, period_end=end,
+    )
+
+
+@app.get("/analytics/intensity_distribution", response_model=IntensityDistributionOut)
+async def analytics_intensity_distribution(
+    exercise: str = Query(..., min_length=1),
+    cycle: Optional[int] = None, week: Optional[int] = None,
+    start: Optional[str] = None, end: Optional[str] = None,
+) -> IntensityDistributionOut:
+    """Break down sets by rep bracket: heavy(1-3), strength(4-6), hypertrophy(7-12), endurance(13+)."""
+    stmt = select(Workout).where(
+        func.lower(Workout.exercise) == exercise.lower(),
+        Workout.reps.is_not(None), Workout.reps > 0,
+    )
+    if cycle is not None: stmt = stmt.where(Workout.cycle == cycle)
+    if week is not None: stmt = stmt.where(Workout.week == week)
+    if start: stmt = stmt.where(Workout.date >= start)
+    if end: stmt = stmt.where(Workout.date <= end)
+    async with async_session() as s:
+        rows = (await s.execute(stmt)).scalars().all()
+    brackets_def = [
+        ("heavy", "1-3", 1, 3),
+        ("strength", "4-6", 4, 6),
+        ("hypertrophy", "7-12", 7, 12),
+        ("endurance", "13+", 13, 9999),
+    ]
+    buckets: Dict[str, dict] = {
+        name: {"range": rng, "sets": 0, "reps": 0, "values": []}
+        for name, rng, _, _ in brackets_def
+    }
+    for w in rows:
+        reps = _safe_int(w.reps) or 0
+        if reps <= 0:
+            continue
+        for name, _, lo, hi in brackets_def:
+            if lo <= reps <= hi:
+                buckets[name]["sets"] += 1
+                buckets[name]["reps"] += reps
+                if w.value is not None:
+                    buckets[name]["values"].append(float(w.value))
+                break
+    result_brackets = []
+    for name, _, _, _ in brackets_def:
+        b = buckets[name]
+        if b["sets"] > 0:
+            result_brackets.append(IntensityBracketOut(
+                bracket=name, rep_range=b["range"],
+                sets=b["sets"], total_reps=b["reps"],
+                avg_value=round(sum(b["values"]) / len(b["values"]), 1) if b["values"] else None,
+                max_value=max(b["values"]) if b["values"] else None,
+            ))
+    return IntensityDistributionOut(
+        exercise=exercise, brackets=result_brackets,
+        total_sets=sum(b["sets"] for b in buckets.values()),
+    )
+
+
+@app.get("/analytics/week_over_week", response_model=WeekOverWeekOut)
+async def analytics_week_over_week(
+    exercise: str = Query(..., min_length=1),
+    cycle: Optional[int] = None,
+) -> WeekOverWeekOut:
+    """Per-week metrics for an exercise — assess stability, progression, or stalls."""
+    stmt = select(Workout).where(
+        func.lower(Workout.exercise) == exercise.lower(),
+        Workout.cycle.is_not(None), Workout.week.is_not(None),
+    )
+    if cycle is not None: stmt = stmt.where(Workout.cycle == cycle)
+    stmt = stmt.order_by(asc(Workout.cycle), asc(Workout.week))
+    async with async_session() as s:
+        rows = (await s.execute(stmt)).scalars().all()
+    by_week: Dict[tuple, list] = {}
+    for w in rows:
+        key = (w.cycle, w.week)
+        by_week.setdefault(key, []).append(w)
+    weeks = []
+    for (cyc, wk), sets in sorted(by_week.items()):
+        vals = [float(s.value) for s in sets if s.value is not None]
+        reps_total = sum(_safe_int(s.reps) or 0 for s in sets)
+        vol = sum((float(s.value) if s.value else 0.0) * (_safe_int(s.reps) or 0) for s in sets)
+        unit = next((s.unit for s in sets if s.unit), None)
+        weeks.append(WeekMetricsOut(
+            cycle=int(cyc), week=int(wk),
+            best_value=max(vals) if vals else None,
+            avg_value=round(sum(vals) / len(vals), 1) if vals else None,
+            total_sets=len(sets), total_reps=reps_total,
+            total_volume=round(vol, 1), unit=unit,
+        ))
+    return WeekOverWeekOut(exercise=exercise, weeks=weeks)
+
+
+@app.get("/analytics/training_density", response_model=TrainingDensityOut)
+async def analytics_training_density(
+    cycle: Optional[int] = None, week: Optional[int] = None,
+    start: Optional[str] = None, end: Optional[str] = None,
+) -> TrainingDensityOut:
+    """Sets and volume per training day — assess fatigue accumulation and session load."""
+    stmt = select(Workout)
+    if cycle is not None: stmt = stmt.where(Workout.cycle == cycle)
+    if week is not None: stmt = stmt.where(Workout.week == week)
+    if start: stmt = stmt.where(Workout.date >= start)
+    if end: stmt = stmt.where(Workout.date <= end)
+    stmt = stmt.order_by(asc(Workout.date))
+    async with async_session() as s:
+        rows = (await s.execute(stmt)).scalars().all()
+    by_date: Dict[str, dict] = {}
+    for w in rows:
+        d = w.date
+        if d not in by_date:
+            by_date[d] = {"sets": 0, "exercises": set(), "volume": 0.0}
+        by_date[d]["sets"] += 1
+        by_date[d]["exercises"].add(w.exercise)
+        vol = (float(w.value) if w.value else 0.0) * (_safe_int(w.reps) or 0)
+        by_date[d]["volume"] += vol
+    days = [
+        DayDensityOut(
+            date=d, total_sets=data["sets"],
+            total_exercises=len(data["exercises"]),
+            total_volume=round(data["volume"], 1),
+            exercises=sorted(data["exercises"]),
+        ) for d, data in sorted(by_date.items())
+    ]
+    n = len(days)
+    return TrainingDensityOut(
+        days=days,
+        avg_sets_per_day=round(sum(d.total_sets for d in days) / n, 1) if n else 0.0,
+        avg_volume_per_day=round(sum(d.total_volume for d in days) / n, 1) if n else 0.0,
+        total_training_days=n,
+    )
+
+
+@app.get("/analytics/trend", response_model=TrendOut)
+async def analytics_trend(
+    exercise: str = Query(..., min_length=1),
+    start: Optional[str] = None, end: Optional[str] = None,
+) -> TrendOut:
+    """Trend direction and slope for an exercise — uses best value per session."""
+    stmt = select(Workout).where(
+        func.lower(Workout.exercise) == exercise.lower(),
+        Workout.value.is_not(None),
+    )
+    if start: stmt = stmt.where(Workout.date >= start)
+    if end: stmt = stmt.where(Workout.date <= end)
+    stmt = stmt.order_by(asc(Workout.date), asc(Workout.id))
+    async with async_session() as s:
+        rows = (await s.execute(stmt)).scalars().all()
+    if not rows:
+        return TrendOut(exercise=exercise)
+    by_date: Dict[str, float] = {}
+    unit = None
+    for w in rows:
+        v = float(w.value)
+        if w.date not in by_date or v > by_date[w.date]:
+            by_date[w.date] = v
+        if not unit and w.unit:
+            unit = w.unit
+    values = [by_date[d] for d in sorted(by_date.keys())]
+    n = len(values)
+    slope = _linear_slope(values)
+    if slope is None:
+        direction = None
+    elif abs(slope) < 0.5:
+        direction = "stable"
+    elif slope > 0:
+        direction = "increasing"
+    else:
+        direction = "decreasing"
+    recent = values[-3:] if n >= 3 else values
+    return TrendOut(
+        exercise=exercise, data_points=n,
+        slope_per_session=round(slope, 2) if slope is not None else None,
+        direction=direction,
+        recent_avg=round(sum(recent) / len(recent), 1) if recent else None,
+        overall_avg=round(sum(values) / n, 1) if n else None,
+        unit=unit,
+    )
+
+
 @app.get("/search_exercise", response_model=SearchExerciseOut)
 async def search_exercise(
     exercise: str, cycle: Optional[int] = None, week: Optional[int] = None,
@@ -1322,10 +1625,10 @@ async def export_csv() -> CsvExportOut:
     buf = io.StringIO()
     writer = csv.writer(buf)
     writer.writerow(["id", "date", "exercise", "set_number", "reps", "value", "unit",
-                      "cycle", "week", "day", "notes", "tags"])
+                      "cycle", "week", "iso_week", "day", "notes", "tags"])
     for w in rows:
         writer.writerow([w.id, w.date, w.exercise, w.set_number, w.reps, w.value, w.unit,
-                          w.cycle, w.week, w.day, (w.notes or ""), (w.tags or "")])
+                          w.cycle, w.week, w.iso_week, w.day, (w.notes or ""), (w.tags or "")])
     return CsvExportOut(filename="workouts.csv", rows=len(rows), csv=buf.getvalue())
 
 
@@ -1337,12 +1640,12 @@ async def export_metcons_csv() -> CsvExportOut:
     writer = csv.writer(buf)
     writer.writerow(["id", "date", "name", "workout_type", "description",
                       "score_time_seconds", "score_rounds", "score_reps", "score_display",
-                      "rx", "time_cap_seconds", "cycle", "week", "day", "notes", "tags"])
+                      "rx", "time_cap_seconds", "cycle", "week", "iso_week", "day", "notes", "tags"])
     for m in rows:
         writer.writerow([m.id, m.date, m.name, m.workout_type, (m.description or ""),
                           m.score_time_seconds, m.score_rounds, m.score_reps,
                           (m.score_display or ""), (m.rx or ""), m.time_cap_seconds,
-                          m.cycle, m.week, m.day, (m.notes or ""), (m.tags or "")])
+                          m.cycle, m.week, m.iso_week, m.day, (m.notes or ""), (m.tags or "")])
     return CsvExportOut(filename="metcons.csv", rows=len(rows), csv=buf.getvalue())
 
 
