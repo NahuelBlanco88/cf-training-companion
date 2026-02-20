@@ -525,7 +525,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 app = FastAPI(
     title="CF-Log API",
     description="CrossFit Training Log & Analytics API. Strength sets + metcon/benchmark tracking.",
-    version="14.2.0",
+    version="14.3.0",
     lifespan=lifespan,
 )
 
@@ -586,6 +586,25 @@ async def rate_limit_middleware(request: Request, call_next):
 _LIKE_ESCAPE_CHAR = "!"  # Use ! instead of \ to avoid PG backslash issues
 
 
+def _safe_int(val) -> int | None:
+    """Parse a reps value that may be '1+1' sum notation, plain int, or None."""
+    if val is None:
+        return None
+    s = str(val).strip()
+    if not s:
+        return None
+    try:
+        return int(s)
+    except ValueError:
+        pass
+    if '+' in s:
+        try:
+            return sum(int(p) for p in s.split('+'))
+        except ValueError:
+            pass
+    return None
+
+
 def _escape_like(s: str) -> str:
     return s.replace("!", "!!").replace("%", "!%").replace("_", "!_")
 
@@ -599,7 +618,7 @@ def _safe_like(column, term: str):
 def _row_to_out(w: Workout) -> WorkoutOut:
     return WorkoutOut(
         id=w.id, date=w.date, exercise=w.exercise, set_number=w.set_number,
-        reps=int(w.reps) if w.reps is not None else None,
+        reps=_safe_int(w.reps),
         value=w.value, unit=w.unit, cycle=w.cycle, week=w.week,
         day=w.day, notes=w.notes, tags=w.tags,
     )
@@ -1220,7 +1239,7 @@ async def estimated_1rm(
         return OneRMOut(exercise=exercise, formula=formula)
     best_1rm, best_row = 0.0, None
     for w in rows:
-        weight, reps = float(w.value), int(w.reps)
+        weight, reps = float(w.value), _safe_int(w.reps) or 0
         if reps == 1: e1rm = weight
         elif formula == "epley": e1rm = weight * (1 + reps / 30)
         else: e1rm = weight * (36 / (37 - reps)) if reps < 37 else weight
@@ -1228,7 +1247,7 @@ async def estimated_1rm(
     if best_row is None:
         return OneRMOut(exercise=exercise, formula=formula)
     return OneRMOut(exercise=exercise, estimated_1rm_kg=round(best_1rm, 1),
-                    based_on_value=float(best_row.value), based_on_reps=int(best_row.reps), formula=formula)
+                    based_on_value=float(best_row.value), based_on_reps=_safe_int(best_row.reps) or 0, formula=formula)
 
 
 @app.get("/analytics/volume", response_model=WeeklyVolumeOut)
@@ -1247,7 +1266,7 @@ async def analytics_volume(
     for w in rows:
         nm = w.exercise
         if nm not in exercises: exercises[nm] = {"total_volume": 0.0, "total_sets": 0, "total_reps": 0, "unit": w.unit}
-        reps = int(w.reps) if w.reps else 0
+        reps = _safe_int(w.reps) or 0
         exercises[nm]["total_volume"] += (float(w.value) if w.value else 0.0) * reps
         exercises[nm]["total_sets"] += 1
         exercises[nm]["total_reps"] += reps
@@ -1273,7 +1292,7 @@ async def exercise_timeline(
         if d not in by_date: by_date[d] = {"best": 0.0, "unit": w.unit, "sets": 0, "reps": 0}
         val = float(w.value)
         if val > by_date[d]["best"]: by_date[d]["best"] = val; by_date[d]["unit"] = w.unit
-        by_date[d]["sets"] += 1; by_date[d]["reps"] += int(w.reps) if w.reps else 0
+        by_date[d]["sets"] += 1; by_date[d]["reps"] += _safe_int(w.reps) or 0
     return ExerciseTimelineOut(exercise=exercise, timeline=[
         TimelinePointOut(date=d, best_value=data["best"], unit=data["unit"],
                          total_sets=data["sets"], total_reps=data["reps"])
