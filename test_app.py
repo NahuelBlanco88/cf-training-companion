@@ -1,5 +1,5 @@
 """
-Test suite for CF-Log API v13.
+Test suite for CF-Log API v14.3.
 Uses an in-memory SQLite database via aiosqlite.
 """
 import pytest
@@ -69,7 +69,7 @@ VALID_METCON = {
 async def test_root(client):
     r = await client.get("/")
     assert r.status_code == 200
-    assert "v13" in r.json()["message"]
+    assert "v14.3" in r.json()["message"]
 
 
 @pytest.mark.asyncio
@@ -1001,3 +1001,184 @@ async def test_export_metcons_csv_empty(client):
     assert r.status_code == 200
     data = r.json()
     assert data["rows"] == 0
+
+
+# =============================================================================
+# ADVANCED ANALYTICS TESTS
+# =============================================================================
+
+# ─── Movement Frequency ─────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_movement_frequency(client):
+    workouts = [
+        {**VALID_WORKOUT, "set_number": i, "value": 100.0 + i * 5}
+        for i in range(1, 4)
+    ]
+    await client.post("/workouts/bulk", json={"workouts": workouts})
+    # Add a different exercise
+    w2 = {**VALID_WORKOUT, "exercise": "Deadlift", "set_number": 1, "value": 140.0}
+    await client.post("/workouts", json=w2)
+
+    r = await client.get("/analytics/movement_frequency")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["total_unique_exercises"] == 2
+    exercises = {e["exercise"]: e for e in data["exercises"]}
+    assert exercises["Back Squat"]["total_sets"] == 3
+    assert exercises["Deadlift"]["total_sets"] == 1
+
+
+@pytest.mark.asyncio
+async def test_movement_frequency_filtered(client):
+    await client.post("/workouts", json=VALID_WORKOUT)
+    w2 = {**VALID_WORKOUT, "exercise": "Deadlift", "set_number": 1, "cycle": 2}
+    await client.post("/workouts", json=w2)
+
+    r = await client.get("/analytics/movement_frequency", params={"cycle": 1})
+    assert r.status_code == 200
+    assert r.json()["total_unique_exercises"] == 1
+
+
+@pytest.mark.asyncio
+async def test_movement_frequency_empty(client):
+    r = await client.get("/analytics/movement_frequency", params={"cycle": 99})
+    assert r.status_code == 200
+    assert r.json()["total_unique_exercises"] == 0
+
+
+# ─── Intensity Distribution ──────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_intensity_distribution(client):
+    workouts = [
+        {**VALID_WORKOUT, "set_number": 1, "reps": 2, "value": 140.0},   # heavy
+        {**VALID_WORKOUT, "set_number": 2, "reps": 5, "value": 100.0},   # strength
+        {**VALID_WORKOUT, "set_number": 3, "reps": 10, "value": 70.0},   # hypertrophy
+        {**VALID_WORKOUT, "set_number": 4, "reps": 15, "value": 50.0},   # endurance
+    ]
+    await client.post("/workouts/bulk", json={"workouts": workouts}, params={"force": True})
+
+    r = await client.get("/analytics/intensity_distribution", params={"exercise": "Back Squat"})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["total_sets"] == 4
+    brackets = {b["bracket"]: b for b in data["brackets"]}
+    assert brackets["heavy"]["sets"] == 1
+    assert brackets["heavy"]["max_value"] == 140.0
+    assert brackets["strength"]["sets"] == 1
+    assert brackets["hypertrophy"]["sets"] == 1
+    assert brackets["endurance"]["sets"] == 1
+
+
+@pytest.mark.asyncio
+async def test_intensity_distribution_empty(client):
+    r = await client.get("/analytics/intensity_distribution", params={"exercise": "Unicorn"})
+    assert r.status_code == 200
+    assert r.json()["total_sets"] == 0
+
+
+# ─── Week Over Week ──────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_week_over_week(client):
+    for wk in [1, 2, 3]:
+        w = {**VALID_WORKOUT, "week": wk, "set_number": wk, "value": 100.0 + wk * 5}
+        await client.post("/workouts", json=w)
+
+    r = await client.get("/analytics/week_over_week", params={"exercise": "Back Squat", "cycle": 1})
+    assert r.status_code == 200
+    data = r.json()
+    assert len(data["weeks"]) == 3
+    assert data["weeks"][0]["best_value"] == 105.0
+    assert data["weeks"][1]["best_value"] == 110.0
+    assert data["weeks"][2]["best_value"] == 115.0
+
+
+@pytest.mark.asyncio
+async def test_week_over_week_empty(client):
+    r = await client.get("/analytics/week_over_week", params={"exercise": "Unicorn"})
+    assert r.status_code == 200
+    assert len(r.json()["weeks"]) == 0
+
+
+# ─── Training Density ────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_training_density(client):
+    workouts = [
+        {**VALID_WORKOUT, "date": "2026-01-15", "set_number": 1, "reps": 5, "value": 100.0},
+        {**VALID_WORKOUT, "date": "2026-01-15", "set_number": 2, "reps": 5, "value": 105.0},
+        {**VALID_WORKOUT, "date": "2026-01-16", "set_number": 3, "reps": 5, "value": 110.0},
+    ]
+    await client.post("/workouts/bulk", json={"workouts": workouts}, params={"force": True})
+
+    r = await client.get("/analytics/training_density", params={"cycle": 1})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["total_training_days"] == 2
+    assert len(data["days"]) == 2
+    day1 = data["days"][0]
+    assert day1["date"] == "2026-01-15"
+    assert day1["total_sets"] == 2
+
+
+@pytest.mark.asyncio
+async def test_training_density_empty(client):
+    r = await client.get("/analytics/training_density", params={"cycle": 99})
+    assert r.status_code == 200
+    assert r.json()["total_training_days"] == 0
+
+
+# ─── Trend ───────────────────────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_trend_increasing(client):
+    for i, val in enumerate([80.0, 90.0, 100.0, 110.0], 1):
+        w = {**VALID_WORKOUT, "date": f"2026-01-{10+i:02d}", "set_number": i, "value": val}
+        await client.post("/workouts", json=w)
+
+    r = await client.get("/analytics/trend", params={"exercise": "Back Squat"})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["data_points"] == 4
+    assert data["direction"] == "increasing"
+    assert data["slope_per_session"] == 10.0
+    assert data["recent_avg"] == pytest.approx(100.0, abs=0.1)
+
+
+@pytest.mark.asyncio
+async def test_trend_stable(client):
+    for i in range(1, 5):
+        w = {**VALID_WORKOUT, "date": f"2026-01-{10+i:02d}", "set_number": i, "value": 100.0}
+        await client.post("/workouts", json=w)
+
+    r = await client.get("/analytics/trend", params={"exercise": "Back Squat"})
+    assert r.status_code == 200
+    assert r.json()["direction"] == "stable"
+
+
+@pytest.mark.asyncio
+async def test_trend_empty(client):
+    r = await client.get("/analytics/trend", params={"exercise": "Unicorn"})
+    assert r.status_code == 200
+    assert r.json()["data_points"] == 0
+    assert r.json()["direction"] is None
+
+
+# ─── iso_week in responses ───────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_iso_week_in_workout(client):
+    w = {**VALID_WORKOUT, "iso_week": 3}
+    r = await client.post("/workouts", json=w)
+    assert r.status_code == 200
+    assert r.json()["iso_week"] == 3
+
+
+@pytest.mark.asyncio
+async def test_iso_week_in_csv_export(client):
+    await client.post("/workouts", json=VALID_WORKOUT)
+    r = await client.get("/export/csv")
+    assert r.status_code == 200
+    assert "iso_week" in r.json()["csv"]
