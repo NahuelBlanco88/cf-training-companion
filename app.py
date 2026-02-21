@@ -22,6 +22,7 @@ from typing import AsyncGenerator, Dict, List, Optional
 
 from fastapi import Body, FastAPI, HTTPException, Query, Request, Response
 from fastapi import Path as FPath
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import (
@@ -604,6 +605,23 @@ app = FastAPI(
     description="CrossFit Training Log & Analytics API. Strength sets + metcon/benchmark tracking.",
     version="14.3.0",
     lifespan=lifespan,
+)
+
+# -----------------------------------------------------------------------------
+# CORS — allow Next.js dashboard (and any configured origins) to call the API
+# Set ALLOWED_ORIGINS env var as a comma-separated list for production,
+# e.g. "https://cf-dashboard.vercel.app,https://myapp.com"
+# Defaults to localhost:3000 for local development.
+# -----------------------------------------------------------------------------
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")
+_allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
