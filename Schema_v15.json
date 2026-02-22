@@ -2286,12 +2286,12 @@
             "description": "Total reps in this bracket"
           },
           "avg_value": {
-            "type": "number",
-            "description": "Average weight/value in this bracket"
+            "anyOf": [{"type": "number"}, {"type": "null"}],
+            "description": "Average weight/value in this bracket. Null if no weight was recorded."
           },
           "max_value": {
-            "type": "number",
-            "description": "Max weight/value in this bracket"
+            "anyOf": [{"type": "number"}, {"type": "null"}],
+            "description": "Max weight/value in this bracket. Null if no weight was recorded."
           }
         },
         "required": [
