@@ -594,7 +594,10 @@ class DaySummaryOut(BaseModel):
 # -----------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator:
-    await _init_db()
+    try:
+        await _init_db()
+    except Exception as e:
+        log.error(f"DB init failed on startup (will retry on first request): {e}")
     yield
     await engine.dispose()
 
