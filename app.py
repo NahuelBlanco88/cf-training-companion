@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import csv
 import io
 import os
@@ -57,6 +58,7 @@ if _cloud_sql:
     engine = create_async_engine(
         DB_PATH, echo=False, pool_pre_ping=True,
         pool_size=20, max_overflow=30, pool_timeout=30,
+        connect_args={"timeout": 10},
     )
     log.info(f"Using Cloud SQL (async): {_cloud_sql}")
 else:
@@ -595,7 +597,9 @@ class DaySummaryOut(BaseModel):
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator:
     try:
-        await _init_db()
+        await asyncio.wait_for(_init_db(), timeout=30.0)
+    except asyncio.TimeoutError:
+        log.error("DB init timed out on startup — app will start without DB init")
     except Exception as e:
         log.error(f"DB init failed on startup (will retry on first request): {e}")
     yield
