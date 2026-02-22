@@ -23,6 +23,7 @@ from typing import AsyncGenerator, Dict, List, Optional
 
 from fastapi import Body, FastAPI, HTTPException, Query, Request, Response
 from fastapi import Path as FPath
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import (
@@ -35,6 +36,7 @@ from sqlalchemy import (
     select,
     text,
 )
+from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -47,14 +49,24 @@ log = logging.getLogger("cf-log-api")
 # -----------------------------------------------------------------------------
 # DB connection
 # -----------------------------------------------------------------------------
+def _build_cloud_sql_dsn(db_user: str, db_pass: str, db_name: str, cloud_sql_conn: str) -> str:
+    """Build a safe asyncpg DSN for Cloud SQL Unix socket connections."""
+    socket_path = f"/cloudsql/{cloud_sql_conn}"
+    return URL.create(
+        drivername="postgresql+asyncpg",
+        username=db_user,
+        password=db_pass,
+        database=db_name,
+        query={"host": socket_path},
+    ).render_as_string(hide_password=False)
+
 _cloud_sql = os.getenv("CLOUD_SQL_CONNECTION_NAME")
 _db_user = os.getenv("DB_USER", "postgres")
 _db_pass = os.getenv("DB_PASSWORD", "")
 _db_name = os.getenv("DB_NAME", "cf_log")
 
 if _cloud_sql:
-    _socket_path = f"/cloudsql/{_cloud_sql}"
-    DB_PATH = f"postgresql+asyncpg://{_db_user}:{_db_pass}@/{_db_name}?host={_socket_path}"
+    DB_PATH = _build_cloud_sql_dsn(_db_user, _db_pass, _db_name, _cloud_sql)
     engine = create_async_engine(
         DB_PATH, echo=False, pool_pre_ping=True,
         pool_size=20, max_overflow=30, pool_timeout=30,
@@ -622,6 +634,24 @@ app = FastAPI(
 )
 
 
+def _parse_allowed_origins() -> list[str]:
+    """Parse ALLOWED_ORIGINS into a clean list for CORS middleware."""
+    origins_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")
+    parsed = [origin.strip() for origin in origins_raw.split(",") if origin.strip()]
+    return parsed or ["http://localhost:3000"]
+
+
+_allowed_origins = _parse_allowed_origins()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+log.info(f"Configured CORS origins: {_allowed_origins}")
+
+
 # -----------------------------------------------------------------------------
 # Global exception handler — log full traceback so Cloud Run logs show the cause
 # -----------------------------------------------------------------------------
@@ -643,9 +673,21 @@ RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "300"))
 RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))
 
 
+def _client_ip_from_request(request: Request) -> str:
+    """Best-effort client IP with proxy support (Cloud Run / load balancers)."""
+    forwarded_for = request.headers.get("x-forwarded-for", "")
+    if forwarded_for:
+        first_ip = forwarded_for.split(",")[0].strip()
+        if first_ip:
+            return first_ip
+    if request.client and request.client.host:
+        return request.client.host
+    return "unknown"
+
+
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _client_ip_from_request(request)
     now = time.time()
     window_start = now - RATE_LIMIT_WINDOW
     _rate_limit_store[client_ip] = [
