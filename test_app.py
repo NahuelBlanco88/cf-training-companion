@@ -12,7 +12,8 @@ os.environ.pop("CLOUD_SQL_CONNECTION_NAME", None)
 os.environ.pop("CFLOG_DB", None)
 os.environ["RATE_LIMIT_REQUESTS"] = "10000"  # effectively disable for tests
 
-from app import app, engine, _init_db, Base, _rate_limit_store  # noqa: E402
+import app as app_module  # noqa: E402
+from app import app, engine, _init_db, Base, _rate_limit_store, _build_cloud_sql_dsn  # noqa: E402
 
 transport = ASGITransport(app=app)
 
@@ -71,6 +72,21 @@ async def test_root(client):
     assert r.status_code == 200
     assert "v14.3" in r.json()["message"]
 
+
+
+
+@pytest.mark.asyncio
+async def test_cloud_sql_dsn_handles_special_characters():
+    dsn = _build_cloud_sql_dsn(
+        "user:name",
+        "p@ss/w:rd+1",
+        "cf-log",
+        "project:region:instance",
+    )
+    assert "postgresql+asyncpg://" in dsn
+    assert "host=%2Fcloudsql%2Fproject%3Aregion%3Ainstance" in dsn
+    assert "user%3Aname" in dsn
+    assert "p%40ss%2Fw%3Ard+1" in dsn
 
 @pytest.mark.asyncio
 async def test_health(client):
@@ -583,6 +599,34 @@ async def test_rate_limit_headers(client):
     assert "X-RateLimit-Limit" in r.headers
     assert "X-RateLimit-Remaining" in r.headers
 
+
+# =============================================================================
+
+
+@pytest.mark.asyncio
+async def test_rate_limit_uses_forwarded_for_header(client):
+    original_limit = app_module.RATE_LIMIT_REQUESTS
+    try:
+        app_module.RATE_LIMIT_REQUESTS = 1
+        r1 = await client.get("/", headers={"x-forwarded-for": "198.51.100.10"})
+        r2 = await client.get("/", headers={"x-forwarded-for": "203.0.113.11"})
+        assert r1.status_code == 200
+        assert r2.status_code == 200
+    finally:
+        app_module.RATE_LIMIT_REQUESTS = original_limit
+
+
+@pytest.mark.asyncio
+async def test_cors_preflight_allows_configured_origin(client):
+    r = await client.options(
+        "/health",
+        headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    assert r.status_code == 200
+    assert r.headers.get("access-control-allow-origin") == "http://localhost:3000"
 
 # =============================================================================
 # METCON TESTS
