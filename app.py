@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import csv
 import io
 import os
@@ -594,7 +595,12 @@ class DaySummaryOut(BaseModel):
 # -----------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator:
-    await _init_db()
+    try:
+        await asyncio.wait_for(_init_db(), timeout=20.0)
+    except asyncio.TimeoutError:
+        log.error("DB init timed out — app starting without schema migration")
+    except Exception as e:
+        log.error(f"DB init error — app starting anyway: {e}")
     yield
     await engine.dispose()
 
