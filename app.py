@@ -594,14 +594,22 @@ class DaySummaryOut(BaseModel):
 # -----------------------------------------------------------------------------
 # App
 # -----------------------------------------------------------------------------
-@asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator:
+async def _safe_init_db() -> None:
+    """Run DB init in the background so it never blocks port binding."""
     try:
         await asyncio.wait_for(_init_db(), timeout=30.0)
+        log.info("DB init completed successfully")
     except asyncio.TimeoutError:
-        log.error("DB init timed out on startup — app will start without DB init")
+        log.error("DB init timed out — app running without schema migration")
     except Exception as e:
-        log.error(f"DB init failed on startup (will retry on first request): {e}")
+        log.error(f"DB init error — app running without schema migration: {e}")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator:
+    # Fire DB init as a background task so port 8080 opens immediately.
+    # Cloud Run's startup probe passes as soon as uvicorn binds the port.
+    asyncio.create_task(_safe_init_db())
     yield
     await engine.dispose()
 
