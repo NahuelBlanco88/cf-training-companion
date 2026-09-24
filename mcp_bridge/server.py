@@ -20,12 +20,16 @@ from pydantic import AnyHttpUrl, Field
 from .auth import JwtVerifier
 from .backend import Backend, BackendError
 from .config import Config
-from .models import MetconInput, WorkoutInput
+from .models import MetconChanges, MetconInput, WorkoutChanges, WorkoutInput
 
 
 READ = ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=False)
 WRITE = ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=False)
-OAUTH_SCHEMES = [{"type": "oauth2", "scopes": ["training:read", "training:write"]}]
+CORRECT = ToolAnnotations(readOnlyHint=False, destructiveHint=True, idempotentHint=False, openWorldHint=False)
+TOOL_SCOPES = {
+    "log_workout_sets": "training:write", "log_metcon": "training:write",
+    "correct_workout_set": "training:edit", "correct_metcon": "training:edit",
+}
 METRICS = {
     "prs": ("/analytics/prs", "exercise"),
     "estimated_1rm": ("/analytics/estimated_1rm", "exercise"),
@@ -73,8 +77,9 @@ class AuthenticatedFastMCP(FastMCP):
         # SDK 1.x accepts this standard MCP field as an extra on Tool.
         tools = await super().list_tools()
         for tool in tools:
-            tool.securitySchemes = OAUTH_SCHEMES
-            tool.meta = {**(tool.meta or {}), "securitySchemes": OAUTH_SCHEMES}
+            schemes = [{"type": "oauth2", "scopes": [TOOL_SCOPES.get(tool.name, "training:read")]}]
+            tool.securitySchemes = schemes
+            tool.meta = {**(tool.meta or {}), "securitySchemes": schemes}
         return tools
 
 
@@ -95,7 +100,7 @@ def create_server(config: Config, *, backend: Backend | None = None, verifier: A
         auth=AuthSettings(
             issuer_url=AnyHttpUrl(config.oauth_issuer),
             resource_server_url=AnyHttpUrl(config.public_url),
-            required_scopes=["training:read", "training:write"],
+            required_scopes=[],  # Each tool checks its own declared scope.
             validate_token_resource=True,
         ),
         host="0.0.0.0", port=int(environ.get("PORT", "8080")),
@@ -148,6 +153,18 @@ def create_server(config: Config, *, backend: Backend | None = None, verifier: A
         """Retrieve the latest matching metcon by date and ID."""
         _access("training:read")
         return await backend.get("/metcons/last", {"name": name})
+
+    @server.tool(title="Inspect a workout set by ID", annotations=READ)
+    async def get_workout_by_id(workout_id: int = Field(ge=1)) -> dict[str, Any]:
+        """Read one set and its version. Provide that version for an intentional correction."""
+        _access("training:read")
+        return await backend.get(f"/workouts/{workout_id}")
+
+    @server.tool(title="Inspect a metcon by ID", annotations=READ)
+    async def get_metcon_by_id(metcon_id: int = Field(ge=1)) -> dict[str, Any]:
+        """Read one metcon and its version before an intentional correction."""
+        _access("training:read")
+        return await backend.get(f"/metcons/{metcon_id}")
 
     @server.tool(title="Get training statistics", annotations=READ)
     async def get_training_stats() -> dict[str, Any]:
@@ -254,7 +271,7 @@ def create_server(config: Config, *, backend: Backend | None = None, verifier: A
             raise ValueError("Too many matching results for a safe duplicate check; write refused")
         if any(_confirmed_fields(item, row, title_field="name") for item in previous):
             raise ValueError("A matching metcon already exists. Inspect existing records before writing")
-        receipt = await backend.post("/metcons", row)
+        receipt = await backend.post("/metcons", row, headers={"X-CF-Prevent-Duplicate": "true"})
         row_id = receipt.get("id") if isinstance(receipt, dict) else None
         if type(row_id) is not int or row_id <= 0:
             return {"saved": True, "verified": False,
@@ -269,6 +286,54 @@ def create_server(config: Config, *, backend: Backend | None = None, verifier: A
             verified = False
         return {"saved": True, "id": row_id, "verified": verified,
                 "warning": None if verified else "Saved ID could not be read back. Do not retry automatically."}
+
+    @server.tool(title="Correct one workout set", annotations=CORRECT)
+    async def correct_workout_set(
+        workout_id: int = Field(ge=1), expected_version: str = Field(pattern=r"^[0-9a-f]{64}$"),
+        changes: WorkoutChanges = Field(),
+    ) -> dict[str, Any]:
+        """Correct only supplied fields after the user identifies the set. Read by ID first; stale versions fail."""
+        _access("training:edit")
+        patch = changes.model_dump(mode="json", exclude_unset=True)
+        result = await backend.patch(f"/workouts/{workout_id}",
+                                     {"expected_version": expected_version, "changes": patch})
+        if not isinstance(result, dict) or not isinstance(result.get("record"), dict):
+            return {"saved": True, "verified": False,
+                    "warning": "Unexpected correction receipt. Inspect the ID before retrying."}
+        try:
+            latest = await backend.get(f"/workouts/{workout_id}")
+            verified = (isinstance(latest, dict) and latest.get("version") == result.get("version")
+                        and latest.get("record", {}).get("id") == workout_id
+                        and _confirmed_fields(latest["record"], patch, title_field="exercise"))
+        except (BackendError, ValueError, TypeError, AttributeError):
+            verified = False
+        return {"saved": True, "verified": verified, "record": result["record"],
+                "version": result.get("version"),
+                "warning": None if verified else "Correction could not be read back. Do not retry automatically."}
+
+    @server.tool(title="Correct one metcon", annotations=CORRECT)
+    async def correct_metcon(
+        metcon_id: int = Field(ge=1), expected_version: str = Field(pattern=r"^[0-9a-f]{64}$"),
+        changes: MetconChanges = Field(),
+    ) -> dict[str, Any]:
+        """Correct only supplied fields after the user identifies the metcon. Stale versions fail."""
+        _access("training:edit")
+        patch = changes.model_dump(mode="json", exclude_unset=True)
+        result = await backend.patch(f"/metcons/{metcon_id}",
+                                     {"expected_version": expected_version, "changes": patch})
+        if not isinstance(result, dict) or not isinstance(result.get("record"), dict):
+            return {"saved": True, "verified": False,
+                    "warning": "Unexpected correction receipt. Inspect the ID before retrying."}
+        try:
+            latest = await backend.get(f"/metcons/{metcon_id}")
+            verified = (isinstance(latest, dict) and latest.get("version") == result.get("version")
+                        and latest.get("record", {}).get("id") == metcon_id
+                        and _confirmed_fields(latest["record"], patch, title_field="name"))
+        except (BackendError, ValueError, TypeError, AttributeError):
+            verified = False
+        return {"saved": True, "verified": verified, "record": result["record"],
+                "version": result.get("version"),
+                "warning": None if verified else "Correction could not be read back. Do not retry automatically."}
 
     return server
 

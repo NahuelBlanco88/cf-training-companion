@@ -115,6 +115,10 @@ def test_authenticated_mcp_handshake_lists_tools(config):
     tools = listed.json()["result"]["tools"]
     assert {tool["name"] for tool in tools} >= {"find_workouts", "log_metcon", "log_workout_sets"}
     assert all(tool["securitySchemes"][0]["type"] == "oauth2" for tool in tools)
+    scopes = {tool["name"]: tool["securitySchemes"][0]["scopes"] for tool in tools}
+    assert scopes["find_workouts"] == ["training:read"]
+    assert scopes["log_workout_sets"] == ["training:write"]
+    assert scopes["correct_workout_set"] == ["training:edit"]
 
 
 def test_read_last_uses_actual_latest_route(config, authorized):
@@ -193,6 +197,80 @@ def test_metcon_readback_reports_unverified_when_new_id_is_absent(config, author
     assert result["verified"] is False
     assert result["id"] == 101
     assert calls == ["GET", "POST", "GET"]
+
+
+def test_metcon_insert_requests_server_duplicate_guard(config, authorized):
+    def handler(request):
+        if request.method == "GET":
+            return httpx.Response(200, json=[])
+        assert request.headers["x-cf-prevent-duplicate"] == "true"
+        return httpx.Response(200, json={"id": 17})
+
+    server = bridge.create_server(config, backend=Backend(config, httpx.MockTransport(handler)))
+    result = call(server, "log_metcon", {"metcon": {
+        "date": "2026-09-24", "name": "Fran", "workout_type": "for_time",
+    }})
+    assert result["id"] == 17
+
+
+def test_correct_workout_requires_edit_scope(config, monkeypatch):
+    monkeypatch.setattr(bridge, "get_access_token", lambda: AccessToken(
+        token="read", client_id="test", scopes=["training:read", "training:write"],
+    ))
+
+    def no_backend_calls(request):
+        pytest.fail("No REST call without edit scope")
+
+    server = bridge.create_server(config, backend=Backend(config, httpx.MockTransport(no_backend_calls)))
+    with pytest.raises(ToolError, match="training:edit"):
+        call(server, "correct_workout_set", {
+            "workout_id": 77, "expected_version": "a" * 64, "changes": {"reps": 5},
+        })
+
+
+def test_correct_workout_only_sends_requested_change_and_reads_back(config, monkeypatch):
+    monkeypatch.setattr(bridge, "get_access_token", lambda: AccessToken(
+        token="editor", client_id="test", scopes=["training:read", "training:edit"],
+    ))
+    methods = []
+
+    def handler(request):
+        methods.append(request.method)
+        assert request.url.path == "/workouts/77"
+        if request.method == "PATCH":
+            payload = __import__("json").loads(request.content)
+            assert payload == {"expected_version": "a" * 64, "changes": {"reps": 5}}
+        return httpx.Response(200, json={
+            "record": {"id": 77, "date": "2026-09-24", "exercise": "Squat",
+                       "reps": 5, "value": 75, "notes": "preserved"},
+            "version": "b" * 64,
+        })
+
+    server = bridge.create_server(config, backend=Backend(config, httpx.MockTransport(handler)))
+    result = call(server, "correct_workout_set", {
+        "workout_id": 77, "expected_version": "a" * 64, "changes": {"reps": 5},
+    })
+    assert result["verified"] is True
+    assert result["record"]["notes"] == "preserved"
+    assert methods == ["PATCH", "GET"]
+
+
+def test_stale_correction_never_retries(config, monkeypatch):
+    monkeypatch.setattr(bridge, "get_access_token", lambda: AccessToken(
+        token="editor", client_id="test", scopes=["training:edit"],
+    ))
+    calls = []
+
+    def handler(request):
+        calls.append(request.method)
+        return httpx.Response(412, json={"detail": "Record changed since it was read"})
+
+    server = bridge.create_server(config, backend=Backend(config, httpx.MockTransport(handler)))
+    with pytest.raises(ToolError, match="Record changed"):
+        call(server, "correct_metcon", {
+            "metcon_id": 9, "expected_version": "a" * 64, "changes": {"score_time_seconds": 205},
+        })
+    assert calls == ["PATCH"]
 
 
 def test_bulk_refuses_repeated_sets_within_one_call(config, authorized):

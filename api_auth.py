@@ -52,6 +52,11 @@ def required_capability(method: str, path: str) -> str | None:
         "/workouts", "/workouts/bulk", "/metcons", "/metcons/bulk",
     ):
         return "create"
+    if method == "PATCH" and (
+        (path.startswith("/workouts/") and path[len("/workouts/"):].isdigit())
+        or (path.startswith("/metcons/") and path[len("/metcons/"):].isdigit())
+    ):
+        return "correct"
     if method in ("PUT", "DELETE") and (
         path == "/workouts/undo_last"
         or (path.startswith("/workouts/") and path[len("/workouts/"):].isdigit())
@@ -61,9 +66,15 @@ def required_capability(method: str, path: str) -> str | None:
     return "deny"
 
 
-def authorize(method: str, path: str, authorization: str | None, config: AuthConfig) -> int | None:
+def authorize(method: str, path: str, authorization: str | None,
+              config: AuthConfig, query_keys: frozenset[str] = frozenset(),
+              duplicate_guard: bool = False) -> int | None:
     """Return an HTTP error status or None for allowed requests."""
     if config.mode == "compat":
+        # New conditional edits are only for authenticated MCP clients.
+        # Staging must not expose an additional public edit route.
+        if method == "PATCH":
+            return 403
         return None
     capability = required_capability(method, path)
     if capability is None:
@@ -83,6 +94,12 @@ def authorize(method: str, path: str, authorization: str | None, config: AuthCon
         return 401
     if capability == "deny":
         return 403
-    if role == "gpt" or capability == "read" or (role == "mcp" and capability == "create"):
+    if role == "mcp" and capability == "create":
+        # A leaked bridge token must not be able to turn off duplicate checks
+        # or use legacy bulk metcon insertion without a duplicate guard.
+        if (path not in ("/workouts/bulk", "/metcons") or "force" in query_keys
+                or (path == "/metcons" and not duplicate_guard)):
+            return 403
+    if role == "gpt" or capability == "read" or (role == "mcp" and capability in ("create", "correct")):
         return None
     return 403

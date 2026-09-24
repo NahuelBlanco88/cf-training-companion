@@ -1,0 +1,22 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "cf-training-companion",
+  "version": "0.1.0",
+  "description": "Private CrossFit results log with verified strength and metcon logging, retrieval, analysis, and guarded corrections.",
+  "repository": "https://github.com/NahuelBlanco88/cf-training-companion",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "CF Training Companion",
+        "shortDescription": "Log and analyze your CrossFit results",
+        "longDescription": "Retrieve training history, log performed sets and metcons, analyze progress, and correct identified records with version checks.",
+        "developerName": "Nahuel Blanco",
+        "capabilities": ["Read", "Write"],
+        "defaultPrompt": [
+          "Show my latest squat sets and progression.",
+          "Log the workout I just completed and verify each saved set."
+        ]
+      }
+    }
+  }
+}

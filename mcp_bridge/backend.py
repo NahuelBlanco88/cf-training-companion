@@ -25,7 +25,7 @@ class Backend:
 
     async def request(
         self, method: str, path: str, *, params: Mapping[str, Any] | None = None,
-        body: dict[str, Any] | None = None,
+        body: dict[str, Any] | None = None, headers: Mapping[str, str] | None = None,
     ) -> Any:
         # Callers pass only constant paths. No generic URL/SQL tool is exposed.
         assert path.startswith("/") and ".." not in path
@@ -36,7 +36,7 @@ class Backend:
                 timeout=httpx.Timeout(8.0), follow_redirects=False,
                 trust_env=False, transport=self.transport,
             ) as client:
-                response = await client.request(method, path, params=params, json=body)
+                response = await client.request(method, path, params=params, json=body, headers=headers)
         except httpx.RequestError as exc:
             if method != "GET":
                 raise OutcomeUnknown("The write response was lost; inspect existing records before any retry") from exc
@@ -45,11 +45,11 @@ class Backend:
             if method != "GET" and (response.status_code < 400 or response.status_code >= 500):
                 raise OutcomeUnknown("Write result is uncertain; inspect records before retrying")
             detail = "Request rejected" if response.status_code < 500 else "Backend unavailable"
-            if response.status_code == 409:
+            if response.status_code in (409, 412):
                 try:
-                    detail = str(response.json().get("detail", "Possible duplicate"))
+                    detail = str(response.json().get("detail", "Conflict or stale record"))
                 except (ValueError, AttributeError):
-                    detail = "Possible duplicate"
+                    detail = "Conflict or stale record"
             raise BackendError(response.status_code, detail)
         try:
             return response.json()
@@ -61,5 +61,9 @@ class Backend:
     async def get(self, path: str, params: Mapping[str, Any] | None = None) -> Any:
         return await self.request("GET", path, params=params)
 
-    async def post(self, path: str, body: dict[str, Any]) -> Any:
-        return await self.request("POST", path, body=body)
+    async def post(self, path: str, body: dict[str, Any],
+                   headers: Mapping[str, str] | None = None) -> Any:
+        return await self.request("POST", path, body=body, headers=headers)
+
+    async def patch(self, path: str, body: dict[str, Any]) -> Any:
+        return await self.request("PATCH", path, body=body)

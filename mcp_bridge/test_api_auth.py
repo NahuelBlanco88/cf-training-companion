@@ -19,6 +19,7 @@ ENFORCED = AuthConfig("enforce", GPT, MCP, READER)
     ("POST", "/workouts/bulk"), ("POST", "/metcons"),
     ("POST", "/metcons/bulk"), ("PUT", "/workouts/123"),
     ("DELETE", "/workouts/undo_last"), ("DELETE", "/metcons/12"),
+    ("PATCH", "/workouts/123"), ("PATCH", "/metcons/12"),
 ])
 def test_data_routes_reject_missing_or_wrong_credentials(method, path):
     assert authorize(method, path, None, ENFORCED) == 401
@@ -31,10 +32,19 @@ def test_roles_limit_writes_and_destructive_routes():
     assert authorize("POST", "/workouts/verify", f"Bearer {READER}", ENFORCED) is None
     assert authorize("POST", "/workouts/bulk", f"Bearer {READER}", ENFORCED) == 403
     assert authorize("POST", "/workouts/bulk", f"Bearer {MCP}", ENFORCED) is None
-    assert authorize("POST", "/metcons", f"Bearer {MCP}", ENFORCED) is None
+    assert authorize("POST", "/metcons", f"Bearer {MCP}", ENFORCED) == 403
+    assert authorize("POST", "/metcons", f"Bearer {MCP}", ENFORCED,
+                     duplicate_guard=True) is None
+    assert authorize("POST", "/workouts/bulk", f"Bearer {MCP}", ENFORCED,
+                     frozenset({"force"})) == 403
+    assert authorize("POST", "/workouts", f"Bearer {MCP}", ENFORCED) == 403
+    assert authorize("POST", "/metcons/bulk", f"Bearer {MCP}", ENFORCED) == 403
     assert authorize("DELETE", "/workouts/undo_last", f"Bearer {MCP}", ENFORCED) == 403
     assert authorize("PUT", "/workouts/123", f"Bearer {MCP}", ENFORCED) == 403
     assert authorize("DELETE", "/metcons/123", f"Bearer {MCP}", ENFORCED) == 403
+    assert authorize("PATCH", "/workouts/123", f"Bearer {MCP}", ENFORCED) is None
+    assert authorize("PATCH", "/metcons/123", f"Bearer {MCP}", ENFORCED) is None
+    assert authorize("PATCH", "/workouts/123", f"Bearer {READER}", ENFORCED) == 403
     assert authorize("PUT", "/workouts/123", f"Bearer {GPT}", ENFORCED) is None
     assert authorize("DELETE", "/workouts/undo_last", f"Bearer {GPT}", ENFORCED) is None
     assert authorize("POST", "/unknown", f"Bearer {GPT}", ENFORCED) == 403
@@ -44,6 +54,8 @@ def test_public_health_and_preflight_and_staged_compatibility():
     for method, path in (("GET", "/health"), ("GET", "/"), ("OPTIONS", "/workouts")):
         assert authorize(method, path, None, ENFORCED) is None
     assert authorize("POST", "/workouts", None, AuthConfig("compat")) is None
+    assert authorize("PATCH", "/workouts/123", None, AuthConfig("compat")) == 403
+    assert authorize("PATCH", "/metcons/123", f"Bearer {GPT}", AuthConfig("compat")) == 403
 
 
 def test_enforced_mode_requires_distinct_secrets(monkeypatch):

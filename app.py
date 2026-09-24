@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import asyncio
 import csv
+import hashlib
 import io
+import json
 import os
 import re
 import logging
@@ -19,9 +21,9 @@ from collections import defaultdict
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path as OSPath
-from typing import AsyncGenerator, Dict, List, Optional
+from typing import AsyncGenerator, Dict, List, Optional, Literal
 
-from fastapi import Body, FastAPI, HTTPException, Query, Request, Response
+from fastapi import Body, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi import Path as FPath
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -371,6 +373,108 @@ class MetconOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class WorkoutPatch(BaseModel):
+    """Only explicitly supplied fields change; omitted fields stay intact."""
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    date: Optional[str] = None
+    exercise: Optional[str] = None
+    set_number: Optional[int] = Field(default=None, ge=1)
+    reps: Optional[int] = Field(default=None, ge=0)
+    value: Optional[float] = None
+    unit: Optional[str] = None
+    cycle: Optional[int] = None
+    week: Optional[int] = None
+    iso_week: Optional[int] = Field(default=None, ge=1, le=53)
+    day: Optional[int] = None
+    notes: Optional[str] = None
+    tags: Optional[str] = None
+
+    @field_validator("date")
+    @classmethod
+    def valid_date(cls, v: Optional[str]) -> str:
+        if v is None:
+            raise ValueError("date cannot be cleared")
+        return _validate_date_str(v)
+
+    @field_validator("exercise")
+    @classmethod
+    def valid_exercise(cls, v: Optional[str]) -> str:
+        if v is None or not v.strip():
+            raise ValueError("exercise cannot be cleared")
+        return v.strip().title()
+
+    @field_validator("tags")
+    @classmethod
+    def valid_tags(cls, v: Optional[str]) -> Optional[str]:
+        return _normalize_tags_str(v)
+
+
+class MetconPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    date: Optional[str] = None
+    name: Optional[str] = None
+    workout_type: Optional[Literal["for_time", "amrap", "emom", "chipper", "interval", "other"]] = None
+    description: Optional[str] = None
+    score_time_seconds: Optional[int] = Field(default=None, ge=0)
+    score_rounds: Optional[int] = Field(default=None, ge=0)
+    score_reps: Optional[int] = Field(default=None, ge=0)
+    score_display: Optional[str] = None
+    rx: Optional[Literal["rx", "scaled", "rx_plus"]] = None
+    time_cap_seconds: Optional[int] = Field(default=None, ge=0)
+    cycle: Optional[int] = None
+    week: Optional[int] = None
+    iso_week: Optional[int] = Field(default=None, ge=1, le=53)
+    day: Optional[int] = None
+    notes: Optional[str] = None
+    tags: Optional[str] = None
+
+    @field_validator("date")
+    @classmethod
+    def valid_date(cls, v: Optional[str]) -> str:
+        if v is None:
+            raise ValueError("date cannot be cleared")
+        return _validate_date_str(v)
+
+    @field_validator("name")
+    @classmethod
+    def valid_name(cls, v: Optional[str]) -> str:
+        if v is None or not v.strip():
+            raise ValueError("name cannot be cleared")
+        return v.strip().title()
+
+    @field_validator("workout_type")
+    @classmethod
+    def valid_type(cls, v: Optional[str]) -> str:
+        if v is None:
+            raise ValueError("workout_type cannot be cleared")
+        return v
+
+    @field_validator("tags")
+    @classmethod
+    def valid_tags(cls, v: Optional[str]) -> Optional[str]:
+        return _normalize_tags_str(v)
+
+
+class WorkoutCorrection(BaseModel):
+    expected_version: str
+    changes: WorkoutPatch
+
+
+class MetconCorrection(BaseModel):
+    expected_version: str
+    changes: MetconPatch
+
+
+class VersionedWorkoutOut(BaseModel):
+    record: WorkoutOut
+    version: str
+
+
+class VersionedMetconOut(BaseModel):
+    record: MetconOut
+    version: str
+
+
 class BulkMetconIn(BaseModel):
     metcons: List[MetconIn]
 
@@ -619,13 +723,31 @@ async def _safe_init_db() -> None:
         log.error(f"DB init error — app running without schema migration: {e}")
 
 
+_schema_init_mode = os.getenv("CF_API_SCHEMA_INIT_MODE", "verify")
+if _schema_init_mode not in ("verify", "legacy"):
+    raise ValueError("CF_API_SCHEMA_INIT_MODE must be verify or legacy")
+
+
+async def _verify_existing_schema() -> None:
+    """Check required tables and mapped columns without creating or altering data."""
+    async with engine.connect() as conn:
+        await conn.execute(select(Workout).limit(0))
+        await conn.execute(select(Metcon).limit(0))
+    log.info("Existing workout and metcon schema verified")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator:
-    # Fire DB init as a background task so port 8080 opens immediately.
-    # Cloud Run's startup probe passes as soon as uvicorn binds the port.
-    asyncio.create_task(_safe_init_db())
-    yield
-    await engine.dispose()
+    try:
+        if _schema_init_mode == "legacy":
+            # Explicit opt-in for local first-time databases only. Do not set
+            # this in production against authoritative training tables.
+            asyncio.create_task(_safe_init_db())
+        else:
+            await _verify_existing_schema()
+        yield
+    finally:
+        await engine.dispose()
 
 
 app = FastAPI(
@@ -646,6 +768,8 @@ async def api_auth_middleware(request: Request, call_next):
     status = authorize(
         request.method, request.url.path,
         request.headers.get("authorization"), _auth_config,
+        frozenset(request.query_params.keys()),
+        request.headers.get("x-cf-prevent-duplicate", "").lower() == "true",
     )
     if status is not None:
         return JSONResponse(
@@ -791,6 +915,23 @@ def _metcon_to_out(m: Metcon) -> MetconOut:
     )
 
 
+def _record_version(row: Workout | Metcon) -> str:
+    """Fingerprint all mapped columns, including fields not shown in API output."""
+    snapshot = {column.key: getattr(row, column.key) for column in row.__table__.columns}
+    payload = json.dumps(snapshot, sort_keys=True, separators=(",", ":"),
+                         ensure_ascii=False, default=str)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _apply_correction(row: Workout | Metcon, changes: dict, expected_version: str) -> None:
+    if not changes:
+        raise HTTPException(400, "At least one changed field is required")
+    if _record_version(row) != expected_version:
+        raise HTTPException(412, "Record changed since it was read. Fetch it again before editing")
+    for field, value in changes.items():
+        setattr(row, field, value)
+
+
 def _seconds_to_display(secs: int) -> str:
     if secs < 3600:
         return f"{secs // 60}:{secs % 60:02d}"
@@ -837,6 +978,18 @@ async def _check_duplicates(session: AsyncSession, w: WorkoutIn) -> List[int]:
         stmt = stmt.where(Workout.day == w.day)
     result = await session.execute(stmt)
     return [row[0] for row in result.all()]
+
+
+async def _lock_workout_duplicate_keys(session: AsyncSession, workouts: List[WorkoutIn]) -> None:
+    """Serialize concurrent same-set checks across PostgreSQL workers."""
+    if session.get_bind().dialect.name != "postgresql":
+        return
+    keys = sorted({(w.date, w.exercise.casefold(), w.set_number)
+                   for w in workouts if w.set_number is not None})
+    for key in keys:
+        number = int.from_bytes(hashlib.sha256(repr(key).encode()).digest()[:8],
+                                "big", signed=True)
+        await session.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": number})
 
 
 # =============================================================================
@@ -902,6 +1055,7 @@ async def add_workout(
 ) -> WorkoutOut:
     async with async_session() as s:
         if not force:
+            await _lock_workout_duplicate_keys(s, [w])
             dups = await _check_duplicates(s, w)
             if dups:
                 raise HTTPException(409, detail=f"Possible duplicate. Existing IDs: {dups}. Use force=true to save anyway.")
@@ -922,6 +1076,16 @@ async def add_workouts_bulk(
     ids: List[int] = []
     async with async_session() as s:
         if not force:
+            seen = set()
+            for w in body.workouts:
+                if w.set_number is None:
+                    continue
+                key = (w.date, w.exercise.casefold(), w.set_number,
+                       w.cycle, w.week, w.day)
+                if key in seen:
+                    raise HTTPException(409, "Repeated set in the same batch")
+                seen.add(key)
+            await _lock_workout_duplicate_keys(s, body.workouts)
             all_dups: List[int] = []
             for w in body.workouts:
                 all_dups.extend(await _check_duplicates(s, w))
@@ -1076,6 +1240,29 @@ async def undo_last(
     return UndoOut(deleted=len(ids), ids=ids)
 
 
+@app.get("/workouts/{workout_id}", response_model=VersionedWorkoutOut)
+async def get_workout_by_id(workout_id: int = FPath(..., ge=1)) -> VersionedWorkoutOut:
+    async with async_session() as s:
+        row = await s.get(Workout, workout_id)
+        if row is None:
+            raise HTTPException(404, "Workout not found")
+        return VersionedWorkoutOut(record=_row_to_out(row), version=_record_version(row))
+
+
+@app.patch("/workouts/{workout_id}", response_model=VersionedWorkoutOut)
+async def correct_workout(workout_id: int = FPath(..., ge=1),
+                          body: WorkoutCorrection = Body(...)) -> VersionedWorkoutOut:
+    async with async_session() as s:
+        result = await s.execute(select(Workout).where(Workout.id == workout_id).with_for_update())
+        row = result.scalar_one_or_none()
+        if row is None:
+            raise HTTPException(404, "Workout not found")
+        _apply_correction(row, body.changes.model_dump(exclude_unset=True), body.expected_version)
+        await s.commit()
+        await s.refresh(row)
+        return VersionedWorkoutOut(record=_row_to_out(row), version=_record_version(row))
+
+
 @app.put("/workouts/{workout_id}", response_model=WorkoutOut)
 async def edit_workout(workout_id: int = FPath(..., ge=1), body: WorkoutIn = Body(...)) -> WorkoutOut:
     async with async_session() as s:
@@ -1104,8 +1291,23 @@ async def delete_workout(workout_id: int = FPath(..., ge=1)) -> GenericResponse:
 # ENDPOINTS — Metcons / Conditioning / Benchmarks
 # =============================================================================
 @app.post("/metcons", response_model=MetconOut)
-async def add_metcon(m: MetconIn) -> MetconOut:
+async def add_metcon(m: MetconIn, prevent_duplicate: bool = Header(False, alias="X-CF-Prevent-Duplicate")) -> MetconOut:
     async with async_session() as s:
+        if prevent_duplicate:
+            if s.get_bind().dialect.name == "postgresql":
+                # Serialize same day/name writes across Cloud Run instances.
+                lock_key = int.from_bytes(
+                    hashlib.sha256(f"{m.date}\0{m.name.casefold()}".encode()).digest()[:8],
+                    "big", signed=True,
+                )
+                await s.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": lock_key})
+            result = await s.execute(select(Metcon).where(
+                Metcon.date == m.date, func.lower(Metcon.name) == m.name.lower(),
+            ))
+            requested = m.model_dump()
+            for existing in result.scalars().all():
+                if _metcon_to_out(existing).model_dump(exclude={"id"}) == requested:
+                    raise HTTPException(409, f"Matching metcon already exists (ID {existing.id})")
         obj = Metcon(**m.model_dump())
         s.add(obj)
         await s.flush()
@@ -1186,6 +1388,29 @@ async def last_metcon(name: str = Query(..., min_length=1)) -> MetconOut:
         if not row:
             raise HTTPException(404, "No metcon found with that name")
         return _metcon_to_out(row)
+
+
+@app.get("/metcons/{metcon_id}", response_model=VersionedMetconOut)
+async def get_metcon_by_id(metcon_id: int = FPath(..., ge=1)) -> VersionedMetconOut:
+    async with async_session() as s:
+        row = await s.get(Metcon, metcon_id)
+        if row is None:
+            raise HTTPException(404, "Metcon not found")
+        return VersionedMetconOut(record=_metcon_to_out(row), version=_record_version(row))
+
+
+@app.patch("/metcons/{metcon_id}", response_model=VersionedMetconOut)
+async def correct_metcon(metcon_id: int = FPath(..., ge=1),
+                         body: MetconCorrection = Body(...)) -> VersionedMetconOut:
+    async with async_session() as s:
+        result = await s.execute(select(Metcon).where(Metcon.id == metcon_id).with_for_update())
+        row = result.scalar_one_or_none()
+        if row is None:
+            raise HTTPException(404, "Metcon not found")
+        _apply_correction(row, body.changes.model_dump(exclude_unset=True), body.expected_version)
+        await s.commit()
+        await s.refresh(row)
+        return VersionedMetconOut(record=_metcon_to_out(row), version=_record_version(row))
 
 
 @app.put("/metcons/{metcon_id}", response_model=MetconOut)
