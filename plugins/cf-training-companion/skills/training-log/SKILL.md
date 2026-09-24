@@ -18,6 +18,7 @@ Use the connected CF Training Companion MCP tools for personal training results.
 
 - Use `get_training_day` when cycle, week, and day are known. Use `find_workouts` or `find_metcons` for date ranges and filters. Their 500-row limit and oldest-first ordering mean a broad result may be incomplete; narrow the query before claiming full history.
 - Use `get_last_workout` or `get_last_metcon` for the most recent performance. `find_workouts` with `limit=1` is oldest first, so it does not identify the latest result.
+- A strength row can contain a legacy rep expression in `reps_raw` (for example, `1+1`). The numeric `reps` field is an interpreted count. Display `reps_raw` when it differs from the simple numeric form, and preserve the original expression unless the user explicitly corrects it.
 - Use `analyze_training` for PRs, trends, volume, estimated 1RM, frequency, intensity, training density, and metcon history. Keep units and RX levels separate; label estimates as estimates. Do not diagnose overtraining from a single trend or density metric.
 - For coaching, distinguish observations supported by logged data from advice. State the dates and scope of the records used.
 

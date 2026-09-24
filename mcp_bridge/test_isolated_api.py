@@ -76,6 +76,7 @@ def test_authenticated_partial_corrections_and_metcon_duplicates(tmp_path, monke
             assert corrected.json()["record"]["value"] == 77.5
             assert corrected.json()["record"]["notes"] == "keep this"
             assert corrected.json()["record"]["reps"] == 5
+            assert corrected.json()["record"]["reps_raw"] == "5"
             stale = await client.patch(f"/workouts/{workout_id}", headers=mcp,
                 json={"expected_version": version, "changes": {"reps": 3}})
             assert stale.status_code == 412
@@ -83,6 +84,31 @@ def test_authenticated_partial_corrections_and_metcon_duplicates(tmp_path, monke
                                      json=workout)).status_code == 403
             assert (await client.delete(f"/workouts/{workout_id}", headers=mcp)).status_code == 403
             assert (await client.get(f"/workouts/{workout_id}", headers=mcp)).json()["record"]["reps"] == 5
+
+            # The live table stores reps as VARCHAR; legacy rows can contain
+            # expressions, which must remain visible and unchanged on a patch.
+            async with app_module.async_session() as session:
+                legacy = app_module.Workout(date="2026-09-23", exercise="Legacy Press",
+                                            reps="1+1", value=50.0, unit="kg")
+                session.add(legacy)
+                await session.commit()
+                legacy_id = legacy.id
+            legacy_read = await client.get(f"/workouts/{legacy_id}", headers=mcp)
+            assert legacy_read.status_code == 200, legacy_read.text
+            assert legacy_read.json()["record"]["reps"] == 2
+            assert legacy_read.json()["record"]["reps_raw"] == "1+1"
+            legacy_change = await client.patch(f"/workouts/{legacy_id}", headers=mcp,
+                json={"expected_version": legacy_read.json()["version"],
+                      "changes": {"notes": "checked"}})
+            assert legacy_change.status_code == 200, legacy_change.text
+            assert legacy_change.json()["record"]["reps_raw"] == "1+1"
+            estimated = await client.get("/analytics/estimated_1rm?exercise=Legacy%20Press", headers=mcp)
+            assert estimated.status_code == 200, estimated.text
+            assert estimated.json()["based_on_reps"] == 2
+            intensity = await client.get("/analytics/intensity_distribution?exercise=Legacy%20Press",
+                                         headers=mcp)
+            assert intensity.status_code == 200, intensity.text
+            assert intensity.json()["total_sets"] == 1
 
             metcon = {"date": "2026-09-24", "name": "Fran", "workout_type": "for_time",
                       "score_time_seconds": 210}

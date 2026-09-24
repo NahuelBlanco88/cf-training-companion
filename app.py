@@ -105,7 +105,9 @@ class Workout(Base):
     date: Mapped[str] = mapped_column(String, nullable=False)
     exercise: Mapped[str] = mapped_column(String, nullable=False)
     set_number: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    reps: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    # The live public.workout column is VARCHAR and may contain legacy
+    # expressions such as '1+1'. Keep its physical type and original value.
+    reps: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     value: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     unit: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     cycle: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
@@ -146,7 +148,7 @@ class Metcon(Base):
 
 
 # -----------------------------------------------------------------------------
-# Startup: create tables & run migrations
+# Legacy startup initializer, never used in the default verify mode
 # -----------------------------------------------------------------------------
 async def _init_db():
     async with engine.begin() as conn:
@@ -274,6 +276,7 @@ class WorkoutOut(BaseModel):
     exercise: str
     set_number: Optional[int] = None
     reps: Optional[int] = None
+    reps_raw: Optional[str] = None
     value: Optional[float] = None
     unit: Optional[str] = None
     cycle: Optional[int] = None
@@ -898,7 +901,7 @@ def _safe_like(column, term: str):
 def _row_to_out(w: Workout) -> WorkoutOut:
     return WorkoutOut(
         id=w.id, date=w.date, exercise=w.exercise, set_number=w.set_number,
-        reps=_safe_int(w.reps),
+        reps=_safe_int(w.reps), reps_raw=str(w.reps) if w.reps is not None else None,
         value=w.value, unit=w.unit, cycle=w.cycle, week=w.week,
         iso_week=w.iso_week, day=w.day, notes=w.notes, tags=w.tags,
     )
@@ -1626,7 +1629,7 @@ async def estimated_1rm(
     async with async_session() as s:
         result = await s.execute(select(Workout).where(
             func.lower(Workout.exercise) == exercise.lower(),
-            Workout.value.is_not(None), Workout.reps.is_not(None), Workout.reps > 0,
+            Workout.value.is_not(None), Workout.reps.is_not(None),
         ))
         rows = result.scalars().all()
     if not rows:
@@ -1634,6 +1637,8 @@ async def estimated_1rm(
     best_1rm, best_row = 0.0, None
     for w in rows:
         weight, reps = float(w.value), _safe_int(w.reps) or 0
+        if reps <= 0:
+            continue
         if reps == 1: e1rm = weight
         elif formula == "epley": e1rm = weight * (1 + reps / 30)
         else: e1rm = weight * (36 / (37 - reps)) if reps < 37 else weight
@@ -1741,7 +1746,7 @@ async def analytics_intensity_distribution(
     """Break down sets by rep bracket: heavy(1-3), strength(4-6), hypertrophy(7-12), endurance(13+)."""
     stmt = select(Workout).where(
         func.lower(Workout.exercise) == exercise.lower(),
-        Workout.reps.is_not(None), Workout.reps > 0,
+        Workout.reps.is_not(None),
     )
     if cycle is not None: stmt = stmt.where(Workout.cycle == cycle)
     if week is not None: stmt = stmt.where(Workout.week == week)

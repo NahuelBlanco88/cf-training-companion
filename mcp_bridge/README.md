@@ -20,6 +20,9 @@ metcons, and read-only startup schema verification. The adapter never imports
 - Corrections use GET-by-ID and PATCH with a version check under a row lock.
   Only explicitly supplied fields change. The REST GET and PATCH routes must
   be deployed before correction tools can be used.
+- The live `public.workout.reps` column is VARCHAR. The API maps it as text
+  and returns both the interpreted integer `reps` and original `reps_raw`, so
+  legacy expressions remain visible; omitted correction fields stay intact.
 - No generic HTTP, arbitrary SQL, export, delete, `force`, or `undo_last` MCP
   tool exists. The old GPT's legacy full-record PUT and DELETE routes remain
   available under its distinct credential until redesigned; plugin deletion
@@ -47,7 +50,10 @@ The reviewed cutover sequence is:
    destination. The draft defaults to `CF_API_SCHEMA_INIT_MODE=verify`, which
    checks mapped columns without DDL and fails startup if they are missing.
    `legacy` startup DDL remains an explicit option for disposable local setups
-   only. Confirm the live catalog is compatible before a production deploy.
+   only. The owner supplied a live column listing matching all mapped workout
+   and metcon columns, including the text `workout.reps` column. Keys, grants,
+   live PostgreSQL behavior, and a fresh backup still need checking before
+   a production deploy.
    Do not connect the MCP service to production during compatibility mode.
 2. Supply distinct random GPT and MCP Bearer tokens (at least 32 characters)
    from a secret store. An optional third token is read-only. Run the revised
@@ -140,7 +146,7 @@ From the repository root, in an isolated Python environment:
 
 ```sh
 pip install -r mcp_bridge/requirements.txt fastapi sqlalchemy aiosqlite asyncpg pytest
-pytest -q mcp_bridge/test_bridge.py mcp_bridge/test_api_auth.py mcp_bridge/test_isolated_api.py
+pytest -q mcp_bridge/test_bridge.py mcp_bridge/test_api_auth.py mcp_bridge/test_isolated_api.py mcp_bridge/test_plugin_package.py
 ```
 
 MCP tests use an in-process fake REST API and generated test tokens. The
