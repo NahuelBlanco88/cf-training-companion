@@ -71,6 +71,8 @@ The reviewed cutover sequence is:
    inspecting configuration and a reviewed compatibility rollback.
 4. Decide which supported OAuth provider and account subject will be used.
    Do not send or check in token values, database passwords or private keys.
+   The [Auth0 setup checklist](AUTH0_SETUP.md) describes one candidate and
+   the discovery and audience checks required before any live connection.
 5. After enforcing backend authentication and configuring OAuth, deploy the
    separate MCP service. Test anonymous rejection, read scopes, write scopes,
    and edit scopes in an isolated environment. Register its real HTTPS URL in
