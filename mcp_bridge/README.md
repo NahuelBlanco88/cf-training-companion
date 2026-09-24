@@ -1,8 +1,8 @@
 # CF Training Companion MCP prototype
 
 An independent, authenticated MCP adapter to the existing REST API. The
-production `Dockerfile` at the repository root and the deployed backend are
-unchanged. This adapter never imports `app.py` and cannot create or alter SQL
+deployed backend is unchanged. The root Dockerfile also includes the proposed
+standalone API authentication module. This adapter never imports `app.py` and cannot create or alter SQL
 tables. It does not call the API on startup. No credentials belong in git.
 
 ## Current scope
@@ -29,22 +29,47 @@ server with MCP discovery, PKCE and ChatGPT-compatible registration; this
 adapter is a resource server and **does not implement login or issue tokens**.
 The server publishes MCP protected resource metadata via the official SDK.
 
-The backend API is **currently public and does not validate credentials**.
-`CF_API_TOKEN` is mandatory to start the adapter, but a token header is not
-protection until the backend rejects missing/incorrect tokens. Therefore:
+The deployed backend API is **currently public and does not validate credentials**.
+The draft includes a staged API auth gate in `api_auth.py`, `app.py`, and the
+root Dockerfile. Its default `CF_API_AUTH_MODE=compat` preserves the current
+GPT Action and leaves the API public. `CF_API_AUTH_MODE=enforce` checks
+credentials. `CF_API_TOKEN` is mandatory to start the adapter, but a token
+header is not protection until the deployed backend enforces authentication.
+The reviewed cutover sequence is:
 
-1. Do not deploy or connect this prototype to production yet. Add and review
-   authentication for the existing REST API while preserving the old GPT's
-   logging path. Confirm unauthenticated and invalid-token calls are rejected.
-2. Decide which supported OAuth provider and account subject will be used.
+1. Before any deployment, verify a recent recoverable backup and the Cloud SQL
+   destination. The root app still runs schema initialization on startup;
+   deployment requires a separate production decision. Do not connect the
+   prototype MCP service to production during compatibility mode.
+2. Supply distinct random GPT and MCP Bearer tokens (at least 32 characters)
+   from a secret store. An optional third token is read-only. Run the revised
+   backend in `compat` while the old GPT Action sends no credential. Set the
+   GPT Action API key in its private editor settings, then check a normal read
+   and a real user-directed log while compatibility remains active. Official
+   OpenAI documentation confirms GPT Action API key support; check the
+   editor's actual Authorization header behavior before enforcing. Never put
+   tokens in its JSON schema.
+3. With the old GPT confirmed working with its credential, change
+   `CF_API_AUTH_MODE=enforce` with both GPT and MCP tokens configured. Verify
+   missing/invalid tokens return 401, read-only credentials cannot write, MCP
+   cannot edit/delete, and GPT still reads and logs. No synthetic workout
+   should be inserted into production. A failed auth cutover warrants
+   inspecting configuration and a reviewed compatibility rollback.
+4. Decide which supported OAuth provider and account subject will be used.
    Do not send or check in token values, database passwords or private keys.
-3. Add read-by-ID and partial update routes to the backend and test on an
+5. Add read-by-ID and partial update routes to the backend and test on an
    isolated DB before enabling edit tools. Add server-side metcon idempotency.
-4. Review backup/PITR and deletion protection separately before changing
+6. Review backup/PITR and deletion protection separately before changing
    production. Avoid running the repository's existing `test_app.py` against
    your logs; its fixture can drop tables.
 
-The current backend requires an API Bearer credential for this design. A
+In enforced mode the GPT token grants the existing reads, creates, edits and
+deletes; MCP allows reads and creates only; the optional read token allows
+reads (including POST verification). `/health`, `/`, and CORS preflight remain
+public. Unknown write paths are denied. The GPT edit/delete permission is a
+legacy compatibility role, not a recommended permanent permission.
+
+The proposed backend requires an API Bearer credential for this design. A
 reviewed rollout must add enforcement before any production MCP connection.
 The JSON Action schema does not itself contain the live GPT Authentication
 setting; the owner confirmed it is currently `None`.
@@ -62,6 +87,20 @@ setting; the owner confirmed it is currently `None`.
 | `MCP_ALLOWED_SUBJECT` | Exact OAuth `sub` permitted to access this personal log |
 | `PORT` | Optional HTTP port, default 8080 |
 
+Backend-only settings, separate from the MCP service:
+
+| Name | Purpose |
+| --- | --- |
+| `CF_API_AUTH_MODE` | `compat` by default; `enforce` only after GPT Action key works |
+| `CF_API_GPT_TOKEN` | Existing GPT's legacy rights; secret store only |
+| `CF_API_MCP_TOKEN` | MCP reads and creates; secret store only |
+| `CF_API_READ_TOKEN` | Optional read-only token; secret store only |
+
+The bridge's `CF_API_TOKEN` must equal the backend's `CF_API_MCP_TOKEN`. Do
+not put any tokens into a build file, GPT instructions, schema, test output,
+or Git history. If the production dashboard calls this backend, identify its
+configured target and give it a read-only credential before enforcement.
+
 Only localhost HTTP URLs are accepted for offline development. Unset
 configuration fails startup. The adapter does not print credential values.
 
@@ -72,6 +111,7 @@ From the repository root, in an isolated Python environment:
 ```sh
 pip install -r mcp_bridge/requirements.txt pytest
 pytest -q mcp_bridge/test_bridge.py
+pytest -q mcp_bridge/test_api_auth.py
 ```
 
 Tests use an in-process fake REST API and generated test tokens. They do not

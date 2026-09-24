@@ -40,6 +40,8 @@ from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+from api_auth import AuthConfig, authorize
+
 # -----------------------------------------------------------------------------
 # Logging
 # -----------------------------------------------------------------------------
@@ -632,6 +634,26 @@ app = FastAPI(
     version="14.3.0",
     lifespan=lifespan,
 )
+
+# Compatibility is intentional until the existing GPT Action sends its API
+# credential. Enforce only after that credential has been configured and
+# checked. See mcp_bridge/README.md for the reviewed switch sequence.
+_auth_config = AuthConfig.from_environment()
+
+
+@app.middleware("http")
+async def api_auth_middleware(request: Request, call_next):
+    status = authorize(
+        request.method, request.url.path,
+        request.headers.get("authorization"), _auth_config,
+    )
+    if status is not None:
+        return JSONResponse(
+            status_code=status,
+            content={"detail": "Authentication required" if status == 401 else "Access denied"},
+            headers={"WWW-Authenticate": "Bearer"} if status == 401 else None,
+        )
+    return await call_next(request)
 
 
 def _parse_allowed_origins() -> list[str]:
