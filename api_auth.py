@@ -22,9 +22,9 @@ class AuthConfig:
         if mode not in ("compat", "enforce"):
             raise ValueError("CF_API_AUTH_MODE must be compat or enforce")
         if mode == "compat":
-            # Existing GPT Action currently sends no credential. Explicitly
-            # require a later, reviewed switch to enforce after GPT cutover.
-            return cls(mode=mode)
+            # Keep requests permissive while the GPT Action switches to its
+            # credential, but recognize the configured key for safe telemetry.
+            return cls(mode=mode, gpt_token=os.getenv("CF_API_GPT_TOKEN", ""))
         tokens = (
             os.getenv("CF_API_GPT_TOKEN", ""),
             os.getenv("CF_API_MCP_TOKEN", ""),
@@ -38,6 +38,17 @@ class AuthConfig:
         if len(set(active)) != len(active):
             raise ValueError("API tokens must be distinct")
         return cls(mode=mode, gpt_token=tokens[0], mcp_token=tokens[1], read_token=tokens[2])
+
+
+def compatibility_credential_status(authorization: str | None,
+                                    config: AuthConfig) -> str:
+    """Classify a staged GPT key without exposing it or changing access."""
+    if not authorization:
+        return "missing"
+    if (config.gpt_token and authorization.startswith("Bearer ")
+            and hmac.compare_digest(authorization[len("Bearer "):], config.gpt_token)):
+        return "gpt"
+    return "unrecognized"
 
 
 def required_capability(method: str, path: str) -> str | None:

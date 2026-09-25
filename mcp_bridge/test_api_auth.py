@@ -2,7 +2,7 @@
 
 import pytest
 
-from api_auth import AuthConfig, authorize
+from api_auth import AuthConfig, authorize, compatibility_credential_status
 
 
 GPT = "g" * 48
@@ -56,6 +56,18 @@ def test_public_health_and_preflight_and_staged_compatibility():
     assert authorize("POST", "/workouts", None, AuthConfig("compat")) is None
     assert authorize("PATCH", "/workouts/123", None, AuthConfig("compat")) == 403
     assert authorize("PATCH", "/metcons/123", f"Bearer {GPT}", AuthConfig("compat")) == 403
+
+
+def test_compatibility_observes_gpt_key_without_enforcing_it(monkeypatch):
+    monkeypatch.setenv("CF_API_AUTH_MODE", "compat")
+    monkeypatch.setenv("CF_API_GPT_TOKEN", GPT)
+    config = AuthConfig.from_environment()
+    assert compatibility_credential_status(f"Bearer {GPT}", config) == "gpt"
+    assert compatibility_credential_status(None, config) == "missing"
+    assert compatibility_credential_status("Bearer wrong", config) == "unrecognized"
+    assert compatibility_credential_status(f"Bearer {GPT}", AuthConfig("compat")) == "unrecognized"
+    assert authorize("POST", "/workouts/bulk", None, config) is None
+    assert authorize("POST", "/workouts/bulk", "Bearer wrong", config) is None
 
 
 def test_enforced_mode_requires_distinct_secrets(monkeypatch):

@@ -42,7 +42,7 @@ from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from api_auth import AuthConfig, authorize
+from api_auth import AuthConfig, authorize, compatibility_credential_status, required_capability
 
 # -----------------------------------------------------------------------------
 # Logging
@@ -768,9 +768,10 @@ _auth_config = AuthConfig.from_environment()
 
 @app.middleware("http")
 async def api_auth_middleware(request: Request, call_next):
+    authorization = request.headers.get("authorization")
     status = authorize(
         request.method, request.url.path,
-        request.headers.get("authorization"), _auth_config,
+        authorization, _auth_config,
         frozenset(request.query_params.keys()),
         request.headers.get("x-cf-prevent-duplicate", "").lower() == "true",
     )
@@ -780,7 +781,13 @@ async def api_auth_middleware(request: Request, call_next):
             content={"detail": "Authentication required" if status == 401 else "Access denied"},
             headers={"WWW-Authenticate": "Bearer"} if status == 401 else None,
         )
-    return await call_next(request)
+    response = await call_next(request)
+    if (_auth_config.mode == "compat"
+            and required_capability(request.method, request.url.path) is not None):
+        log.info("auth_compat credential=%s response_status=%d",
+                 compatibility_credential_status(authorization, _auth_config),
+                 response.status_code)
+    return response
 
 
 def _parse_allowed_origins() -> list[str]:

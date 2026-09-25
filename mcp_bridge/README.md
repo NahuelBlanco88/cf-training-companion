@@ -59,7 +59,11 @@ The reviewed cutover sequence is:
    from a secret store. An optional third token is read-only. Run the revised
    backend in `compat` while the old GPT Action sends no credential. Set the
    GPT Action API key in its private editor settings, then check a normal read
-   and a real user-directed log while compatibility remains active. Official
+   and a real user-directed log while compatibility remains active. Compatibility
+   mode logs only `gpt`, `missing`, or `unrecognized` credential classifications
+   and response status for protected routes; it never logs token values or
+   rejects existing requests. Require a successful `gpt` classification on a
+   real GPT request before enabling enforcement. Official
    OpenAI documentation confirms GPT Action API key support; check the
    editor's actual Authorization header behavior before enforcing. Never put
    tokens in its JSON schema.
